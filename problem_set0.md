@@ -1,7 +1,6 @@
 Problem Set 0: Submitting Assignments with Python: Instructions
 ===============================================================
 
-Problem Set 0: Submitting Assignments with Python
 We have prepared a video that should guide you through the required steps here. If you prefer, you can try on your own by following the steps below.
 
 In this introductory problem set we’ll teach you how to retrieve, complete, and submit programming assignments.  There are three parts to the assignment:
