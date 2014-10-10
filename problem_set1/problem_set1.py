@@ -171,12 +171,28 @@ def plot_waveforms(time,voltage,APTimes,titlestr):
         
 ##########################
 #You can put the code that calls the above functions down here    
-if __name__ == "__main__":
-    t,v = load_data('spikes_example.npy')    
-    actualTimes = get_actual_times('spikes_example_answers.npy')
-    APTime = bad_AP_finder(t,v)
-    plot_spikes(t,v,APTime,'Your Code Here ')
-    plot_waveforms(t,v,APTime,'Your Code Here')
-    detector_tester(APTime,actualTimes)
+#if __name__ == "__main__":
+#    t,v = load_data('spikes_example.npy')    
+#    actualTimes = get_actual_times('spikes_example_answers.npy')
+#    APTime = bad_AP_finder(t,v)
+#    plot_spikes(t,v,APTime,'Your Code Here ')
+#    plot_waveforms(t,v,APTime,'Your Code Here')
+#    detector_tester(APTime,actualTimes)
 
+t,v = load_data('spikes_example.npy')
+plt.plot(t,v, hold=True)
+plt.xlabel('Time')
+plt.ylabel('Voltage')
+plt.title('Spike Detection')
 
+APTimes = bad_AP_finder(t,v)
+
+# make tick marks above max voltage
+tickY_bottom = max(v) + 10
+tickY_top = tickY_bottom + 50
+
+for val in APTimes:
+    # draw vertical line; plot uses convention of [x0, x1] [y0, y1]
+    plt.plot([val, val], [tickY_bottom, tickY_top], 'k-', color='r')
+    
+  
