@@ -181,9 +181,9 @@ def plot_waveforms(time,voltage,APTimes,titlestr):
 
 t,v = load_data('spikes_example.npy')
 plt.plot(t,v, hold=True)
-plt.xlabel('Time')
-plt.ylabel('Voltage')
-plt.title('Spike Detection')
+plt.xlabel('Time (s)')
+plt.ylabel('Voltage (uV)')
+plt.title('Action Potentials in Raw Signal')
 
 APTimes = bad_AP_finder(t,v)
 
