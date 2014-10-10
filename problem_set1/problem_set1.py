@@ -147,10 +147,17 @@ def plot_spikes(time,voltage,APTimes,titlestr):
     plot.  The function creates a labeled plot showing the raw voltage signal
     and indicating the location of detected spikes with red tick marks (|)
     """
-    plt.figure()
-    
-    ##Your Code Here    
-    
+    plt.figure()   
+    ##Your Code Here 
+    plt.plot(time,voltage, hold=True)
+    plt.xlabel('Time (s)')
+    plt.ylabel('Voltage (uV)')
+    plt.title(titlestr)
+    tickY_bottom = max(v) + 10
+    tickY_top = tickY_bottom + 50
+    for val in APTimes:
+        # draw vertical tick marks; using convention of [x0, x1] [y0, y1]
+        plt.plot([val, val], [tickY_bottom, tickY_top], 'k-', color='r')
     plt.show()
     
 def plot_waveforms(time,voltage,APTimes,titlestr):
@@ -180,19 +187,25 @@ def plot_waveforms(time,voltage,APTimes,titlestr):
 #    detector_tester(APTime,actualTimes)
 
 t,v = load_data('spikes_example.npy')
-plt.plot(t,v, hold=True)
-plt.xlabel('Time (s)')
-plt.ylabel('Voltage (uV)')
-plt.title('Action Potentials in Raw Signal')
-
 APTimes = bad_AP_finder(t,v)
+plot_spikes(t,v,APTimes,'Action Potentials in Raw Signal')
 
-# make tick marks above max voltage
-tickY_bottom = max(v) + 10
-tickY_top = tickY_bottom + 50
 
-for val in APTimes:
-    # draw vertical line; plot uses convention of [x0, x1] [y0, y1]
-    plt.plot([val, val], [tickY_bottom, tickY_top], 'k-', color='r')
-    
+
+
+#plt.plot(t,v, hold=True)
+#plt.xlabel('Time (s)')
+#plt.ylabel('Voltage (uV)')
+#plt.title('Action Potentials in Raw Signal')
+#
+#APTimes = bad_AP_finder(t,v)
+#
+## make tick marks above max voltage
+#tickY_bottom = max(v) + 10
+#tickY_top = tickY_bottom + 50
+#
+#for val in APTimes:
+#    # draw vertical line; plot uses convention of [x0, x1] [y0, y1]
+#    plt.plot([val, val], [tickY_bottom, tickY_top], 'k-', color='r')
+#    
   
