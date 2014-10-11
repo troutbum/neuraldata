@@ -168,31 +168,26 @@ def plot_waveforms(time,voltage,APTimes,titlestr):
     array, the time of the detected action potentials, and the title of your
     plot.  The function creates a labeled plot showing the waveforms for each
     detected action potential
-    """
-   
-    plt.figure()
-   
+    """  
+    plt.figure()  
+    
     # calculate number of measurements ("bins") to capture for each AP
     sideWidth = 0.003   # +/- 3 milliseconds
     timeStep = t[1]-t[0]
     sideBins = int(sideWidth / timeStep)
     bins = sideBins * 2
         
-    # re-scale x-axis (time) with AP spike centered at zero
-#    subsetT = np.ones(sideBins*2)
-#    subsetT[0] = -sideWidth
-#    for i in range(0, len(subsetT)):
-#       subsetT[i] = subsetT[0] + i*timeStep   
-   
-    # alternate way
+    # re-scale x-axis (time) with AP spike centered at zero 
     subsetT = np.linspace(-sideWidth, sideWidth, bins)  
     subsetV = np.zeros(bins)
    
-    for val in APTimes:     
+    for val in range(len(APTimes)):  
         # find index of action potential (AP) in t data array
-        tIndex = plt.find(t == APTimes[val])
+        spikeTime = APTimes[val]
+        tIndex = plt.find(t == spikeTime)
+        print('time = ', spikeTime, tIndex)
         
-        ## obtain indices for the data subset near a given AP        
+        ## obtain indices for the data interval near a given AP        
         startIndex = tIndex - sideBins
         if startIndex < 0:  # make sure index is never less than zero
             startIndex = 0    
@@ -212,19 +207,18 @@ def plot_waveforms(time,voltage,APTimes,titlestr):
             i = missing
             j = 1
             while i < bins:         # get actual voltage measurement
-                subsetV[i] = v[indices[j]]               
-        # plot waveform of zoomed in view of action potential
-        print('Plotting waveform', subsetT[0], subsetT[-1],
-              subsetV[0], subsetV[-1]) 
-        
+                subsetV[i] = v[indices[j]]   
+                
+        # plot waveform of zoomed in view of action potential       
         plt.plot(subsetT, subsetV, hold=True)
-        plt.show()
+#        print('time endpoints =', subsetT[0], subsetT[-1],
+#              'voltage endpoints = ', subsetV[0], subsetV[-1])  
 
     # Make and label plot  
     plt.xlabel('Time (s)')
     plt.ylabel('Voltage (uV)')
     plt.title(titlestr)               
-    #plt.show()
+    plt.show()
     
 
         
