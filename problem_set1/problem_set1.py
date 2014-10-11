@@ -148,11 +148,13 @@ def plot_spikes(time,voltage,APTimes,titlestr):
     and indicating the location of detected spikes with red tick marks (|)
     """
     plt.figure()   
-    ##Your Code Here 
+    # Make and label plot
     plt.plot(time,voltage, hold=True)
     plt.xlabel('Time (s)')
     plt.ylabel('Voltage (uV)')
     plt.title(titlestr)
+    
+    # create y-coordinates for spike tick marks
     tickY_bottom = max(v) + 10
     tickY_top = tickY_bottom + 50
     for val in APTimes:
@@ -170,7 +172,24 @@ def plot_waveforms(time,voltage,APTimes,titlestr):
    
     plt.figure()
    
-    ## Your Code Here   
+    ## Your Code Here 
+    
+    # find index of action potential in t array
+    APindex = plt.find(t == APTimes[1])
+    
+    # calculate number of measurements on each side of AP
+    sideWidth = 0.003
+    sideBins = int(sideWidth / (t[1]-t[0]))
+    # obtain list of indices for AP measurements within +/- sideWidth
+    indices = range(APindex - sideBins, APindex + sideBins)
+    
+    tempT = t[indices]
+    tempV = v[indices]
+    
+    i=0
+    temp[] = len(v)
+    while t[APindex + i] >= APTimes[1] - 0.003:
+        temp[i] = v[APindex + i]
    
     plt.show()
     
