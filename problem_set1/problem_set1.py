@@ -20,16 +20,6 @@ def load_data(filename):
     data = np.load(filename)[()];
     return np.array(data['time']), np.array(data['voltage'])
     
-def load_answers(filename):
-    """
-    load_answers takes the file name and reads in the data.  It returns two 
-    arrays of data, the first containing the time stamps for when they data
-    were recorded (in units of seconds), and the second containing the 
-    corresponding voltages recorded (in units of microvolts - uV)
-    """
-    data = np.load(filename)[()];
-    return np.array(data['time'])   
-    
 def bad_AP_finder(time,voltage):
     """
     This function takes the following input:
@@ -243,7 +233,7 @@ def plot_waveforms(time,voltage,APTimes,titlestr):
 #    detector_tester(APTime,actualTimes)
 
 t,v = load_data('spikes_example.npy')
-actualTimes = load_answers('spikes_example_answers.npy')
+actualTimes = get_actual_times('spikes_example_answers.npy')
 APTimes = bad_AP_finder(t,v)
 plot_spikes(t,v,APTimes,'Action Potentials in Raw Signal')
 plot_waveforms(t,v,APTimes,'Waveforms')
