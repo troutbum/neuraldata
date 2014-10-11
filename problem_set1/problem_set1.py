@@ -20,6 +20,16 @@ def load_data(filename):
     data = np.load(filename)[()];
     return np.array(data['time']), np.array(data['voltage'])
     
+def load_answers(filename):
+    """
+    load_answers takes the file name and reads in the data.  It returns two 
+    arrays of data, the first containing the time stamps for when they data
+    were recorded (in units of seconds), and the second containing the 
+    corresponding voltages recorded (in units of microvolts - uV)
+    """
+    data = np.load(filename)[()];
+    return np.array(data['time'])   
+    
 def bad_AP_finder(time,voltage):
     """
     This function takes the following input:
@@ -233,25 +243,9 @@ def plot_waveforms(time,voltage,APTimes,titlestr):
 #    detector_tester(APTime,actualTimes)
 
 t,v = load_data('spikes_example.npy')
+actualTimes = load_answers('spikes_example_answers.npy')
 APTimes = bad_AP_finder(t,v)
 plot_spikes(t,v,APTimes,'Action Potentials in Raw Signal')
 plot_waveforms(t,v,APTimes,'Waveforms')
-
-
-
-#plt.plot(t,v, hold=True)
-#plt.xlabel('Time (s)')
-#plt.ylabel('Voltage (uV)')
-#plt.title('Action Potentials in Raw Signal')
-#
-#APTimes = bad_AP_finder(t,v)
-#
-## make tick marks above max voltage
-#tickY_bottom = max(v) + 10
-#tickY_top = tickY_bottom + 50
-#
-#for val in APTimes:
-#    # draw vertical line; plot uses convention of [x0, x1] [y0, y1]
-#    plt.plot([val, val], [tickY_bottom, tickY_top], 'k-', color='r')
-#    
+detector_tester(APTimes,actualTimes)
   
