@@ -81,14 +81,20 @@ def good_AP_finder(time,voltage):
     
     ##Your Code Here!
     # Set a threshold:  minimum voltage to be considered spike
-    threshold = 450
-    threshedTimes = t[v>threshold] 
+#    threshold = 450                 # spikes_example
+#    threshold = 250                 # spikes_easy_practice   
+    threshold = 39                   # spikes_hard_practice   
+    threshedTimes = time[voltage>threshold] 
     
 
     # filter results using minimum delay between spikes
     filteredTimes = []
-    minDelay = 0.0000344   # TrueSpikes= 100% FalseSpikeRate= 0.86 spikes/s
-
+#
+#    minDelay = 0.0000344   # TrueSpikes= 100% FalseSpikeRate= 0.86 spikes/s
+    # used for example and spikes_easy_practice set
+    
+    minDelay = 0.0000444   # TrueSpikes= 92% FalseSpikeRate= -0.34 spikes/s
+    # used for spikes_hard_practice
         
     i = 0          
     for i in range(len(threshedTimes) - 1):  
@@ -275,20 +281,27 @@ def plot_waveforms(time,voltage,APTimes,titlestr):
         
 ##########################
 #You can put the code that calls the above functions down here    
-#if __name__ == "__main__":
-#    t,v = load_data('spikes_example.npy')    
+if __name__ == "__main__":
+#    t,v = load_data('spikes_example.npy')
 #    actualTimes = get_actual_times('spikes_example_answers.npy')
-#    APTime = bad_AP_finder(t,v)
-#    plot_spikes(t,v,APTime,'Your Code Here ')
-#    plot_waveforms(t,v,APTime,'Your Code Here')
-#    detector_tester(APTime,actualTimes)
+#    # APTimes = bad_AP_finder(t,v)
+#    APTimes = good_AP_finder(t,v)
+#    plot_spikes(t,v,APTimes,'Action Potentials in Raw Signal')
+#    plot_waveforms(t,v,APTimes,'Waveforms')
+#    detector_tester(APTimes,actualTimes)
+#    # plot_spikes_actuals(t,v,APTimes,actualTimes, 'Predicted vs Actual Spikes')
+    
+    t,v = load_data('spikes_easy_practice.npy')
+    actualTimes = get_actual_times('spikes_easy_practice_answers.npy')
+    APTimes = good_AP_finder(t,v)
+    plot_spikes(t,v,APTimes,'Action Potentials in Raw Signal')
+    plot_waveforms(t,v,APTimes,'Waveforms')
+    detector_tester(APTimes,actualTimes)
 
-t,v = load_data('spikes_example.npy')
-actualTimes = get_actual_times('spikes_example_answers.npy')
-# APTimes = bad_AP_finder(t,v)
-APTimes = good_AP_finder(t,v)
-plot_spikes(t,v,APTimes,'Action Potentials in Raw Signal')
-plot_waveforms(t,v,APTimes,'Waveforms')
-detector_tester(APTimes,actualTimes)
-plot_spikes_actuals(t,v,APTimes,actualTimes, 'Predicted vs Actual Spikes')
-  
+    t,v = load_data('spikes_hard_practice.npy')
+    actualTimes = get_actual_times('spikes_hard_practice_answers.npy')
+    APTimes = good_AP_finder(t,v)
+    plot_spikes(t,v,APTimes,'Action Potentials in Raw Signal')
+    plot_waveforms(t,v,APTimes,'Waveforms')
+    detector_tester(APTimes,actualTimes)
+ 
