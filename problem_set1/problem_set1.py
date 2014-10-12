@@ -80,7 +80,27 @@ def good_AP_finder(time,voltage):
         return APTimes
     
     ##Your Code Here!
+    # Set a threshold:  minimum voltage to be considered spike
+    threshold = 450
+    threshedTimes = t[v>threshold] 
     
+
+    # filter results using minimum delay between spikes
+    filteredTimes = []
+    minDelay = 0.0000344   # TrueSpikes= 100% FalseSpikeRate= 0.86 spikes/s
+
+        
+    i = 0          
+    for i in range(len(threshedTimes) - 1):  
+        if i == 0:
+            filteredTimes.append(threshedTimes[i])
+        else:
+            if threshedTimes[i+1] - threshedTimes[i] > minDelay:
+                filteredTimes.append(threshedTimes[i])
+            else:
+                print('Filtered spike at time = ' + str(threshedTimes[i])) 
+    
+    APTimes = np.array(filteredTimes)                       
     return APTimes
     
 
@@ -265,8 +285,10 @@ def plot_waveforms(time,voltage,APTimes,titlestr):
 
 t,v = load_data('spikes_example.npy')
 actualTimes = get_actual_times('spikes_example_answers.npy')
-APTimes = bad_AP_finder(t,v)
+# APTimes = bad_AP_finder(t,v)
+APTimes = good_AP_finder(t,v)
 plot_spikes(t,v,APTimes,'Action Potentials in Raw Signal')
 plot_waveforms(t,v,APTimes,'Waveforms')
 detector_tester(APTimes,actualTimes)
+plot_spikes_actuals(t,v,APTimes,actualTimes, 'Predicted vs Actual Spikes')
   
