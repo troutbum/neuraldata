@@ -161,6 +161,37 @@ def plot_spikes(time,voltage,APTimes,titlestr):
         # draw vertical tick marks; using convention of [x0, x1] [y0, y1]
         plt.plot([val, val], [tickY_bottom, tickY_top], 'k-', color='r')
     plt.show()
+
+def plot_spikes_actuals(time,voltage,APTimes,actualTimes, titlestr):
+    """
+    plot_spikes takes five arguments - the recording time array, the voltage
+    array, the time of the detected action potentials, the time of the
+    actual action potentials, and the title of your
+    plot.  The function creates a labeled plot showing the raw voltage signal
+    and indicating the location of detected spikes with red tick marks (|)
+    and the actual spikes with green tick marks (|)
+    """
+    plt.figure()   
+    # Make and label plot
+    plt.plot(time,voltage, hold=True)
+    plt.xlabel('Time (s)')
+    plt.ylabel('Voltage (uV)')
+    plt.title(titlestr)
+    
+    # create y-coordinates for spike tick marks
+    tickY_bottom = max(v) + 10
+    tickY_top = tickY_bottom + 50
+    for val in APTimes:
+        # draw vertical tick marks; using convention of [x0, x1] [y0, y1]
+        plt.plot([val, val], [tickY_bottom, tickY_top], 'k-', color='r')
+        
+    tickY_bottom = max(v) + 60
+    tickY_top = tickY_bottom + 100
+    for val in actualTimes:
+        # draw vertical tick marks; using convention of [x0, x1] [y0, y1]
+        plt.plot([val, val], [tickY_bottom, tickY_top], 'k-', color='g')
+    
+    plt.show()    
     
 def plot_waveforms(time,voltage,APTimes,titlestr):
     """
@@ -185,7 +216,7 @@ def plot_waveforms(time,voltage,APTimes,titlestr):
         # find index of action potential (AP) in t data array
         spikeTime = APTimes[val]
         tIndex = plt.find(t == spikeTime)
-        print('time = ', spikeTime, tIndex)
+        print('Detected Action Potential at time = ' + str(spikeTime), tIndex)
         
         ## obtain indices for the data interval near a given AP        
         startIndex = tIndex - sideBins
