@@ -303,11 +303,23 @@ def plot_waveforms(time,voltage,APTimes,titlestr):
 ##########################
 #You can put the code that calls the above functions down here    
 if __name__ == "__main__":
-    t,v = load_data('spikes_example.npy')    
-    actualTimes = get_actual_times('spikes_example_answers.npy')
+    t,v = load_data('spikes_hard_practice.npy')    
+    actualTimes = get_actual_times('spikes_hard_practice_answers.npy')
     APTime = good_AP_finder(t,v)
     plot_spikes(t,v,APTime,'Action Potentials - Example ')
     plot_waveforms(t,v,APTime,'Waveforms - Example')
     detector_tester(APTime,actualTimes)
 
-
+#    t,v = load_data('spikes_easy_practice.npy')
+#    actualTimes = get_actual_times('spikes_easy_practice_answers.npy')
+#    APTimes = good_AP_finder(t,v)
+#    plot_spikes(t,v,APTimes,'Action Potentials in Raw Signal in Easy Dataset')
+#    plot_waveforms(t,v,APTimes,'Waveforms from Easy Dataset')
+#    detector_tester(APTimes,actualTimes)
+#
+#    t,v = load_data('spikes_hard_practice.npy')
+#    actualTimes = get_actual_times('spikes_hard_practice_answers.npy')
+#    APTimes = good_AP_finder(t,v)
+#    plot_spikes(t,v,APTimes,'Action Potentials in Raw Signal in Hard Dataset')
+#    plot_waveforms(t,v,APTimes,'Waveforms from Hard Dataset')
+#    detector_tester(APTimes,actualTimes)

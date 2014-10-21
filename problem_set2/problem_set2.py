@@ -47,6 +47,39 @@ def bin_spikes(trials, spk_times, time_bin):
     (in degrees from 0-360) and the second column containing the average firing rate
     for each direction
     """
+    # create data structure (spike count)
+    column0 = np.arange(0,360,45)
+    column1 = np.zeros(8)
+    dir_count = np.column_stack((column0, column1))
+    
+    # iterate through all the trials
+    for i in range(0, len(trials)):
+        
+        # get direction and determine time window to count spikes
+        direction = trials[i,0]
+        start_time = trials[i,1] - time_bin
+        stop_time = trials[i,1] + time_bin
+        
+        # check all spike times to see if they are in the time window
+        for j in range(0, len(spk_times)):
+            if (start_time <= spk_times[j] <= stop_time):
+                
+                # if spike is in time window count it!
+                # iterate through all 8 directions to 
+                # correctly increment the correct direction
+                for k in range(0, len(dir_count)):
+                    if (dir_count[k,0] == direction):
+                        dir_count[k,1] = dir_count[k,1] + 1
+    
+ 
+    # create output data structure (firing rate)
+    column0 = np.arange(0,360,45)
+    column1 = np.zeros(8)
+    dir_rates = np.column_stack((column0, column1))
+    
+    # convert counts to average firing rate       
+    for i in range(0, len(dir_count)):
+        dir_rates[i,1] = dir_count[i,1]/(2*time_bin)
     
     return dir_rates
     
@@ -121,4 +154,9 @@ def preferred_direction(fit_curve):
 if __name__ == "__main__":
     trials = load_experiment('trials.npy')   
     spk_times = load_neuraldata('example_spikes.npy') 
+    
+    # run analysis and create histogram
+    output = bin_spikes(trials,spk_times,0.1)
+    plt.bar(output[:,0],output[:,1])
+
 
