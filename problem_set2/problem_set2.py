@@ -34,7 +34,7 @@ def load_neuraldata(filename):
     data = np.load(filename)[()];
     return np.array(data)
     
-def 1st_bin_spikes(trials, spk_times, time_bin):
+def bin_spikes(trials, spk_times, time_bin):
     """
     bin_spikes takes the trials array (with directions and times) and the spk_times
     array with spike times and returns the average firing rate for each of the
@@ -73,6 +73,8 @@ def 1st_bin_spikes(trials, spk_times, time_bin):
                     if (dir_spike_count[k,0] == direction):
                         dir_spike_count[k,1] = dir_spike_count[k,1] + 1
     
+    print(dir_spike_count)    
+    
     # create output data structure (firing rate)
     column0 = np.arange(0,360,45)
     column1 = np.zeros(8)
@@ -81,11 +83,24 @@ def 1st_bin_spikes(trials, spk_times, time_bin):
     # calculate number of trials per direction  
     dir_trial_count = count_trials(trials)
     
+    print(dir_trial_count)
+    
     # convert counts to average firing rate       
     for i in range(0, len(dir_spike_count)):
         dir_rates[i,1] = dir_spike_count[i,1]/(2*time_bin)
-        dir_rates[i,1] = dir_spike_count[i,1]/dir_trial_count[i,1]
-        
+        dir_rates[i,1] = dir_rates[i,1]/dir_trial_count[i,1] 
+    
+#    print(dir_rates) 
+#    
+#    print(dir_rates[2,1])
+#    print(dir_trial_count[2,1])
+#    print(dir_rates[2,1]/dir_trial_count[2,1])
+#    
+#    for i in range(0, len(dir_spike_count)):    
+#        dir_rates[i,1] = dir_rates[i,1]/dir_trial_count[i,1]     
+#        
+#    print(dir_rates)
+    
     return dir_rates
     
 def count_trials(trials):
@@ -109,56 +124,6 @@ def count_trials(trials):
        
     return dir_trial_count   
 
-def bin_spikes(trials, spk_times, time_bin):
-    """
-    bin_spikes takes the trials array (with directions and times) and the spk_times
-    array with spike times and returns the average firing rate for each of the
-    eight directions of motion, as calculated within a time_bin before and after
-    the trial time (time_bin should be given in seconds).  For example,
-    time_bin = .1 will count the spikes from 100ms before to 100ms after the 
-    trial began.
-    
-    dir_rates should be an 8x2 array with the first column containing the directions
-    (in degrees from 0-360) and the second column containing the average firing rate
-    for each direction
-    """
-    # create data structure (spike count)
-    column0 = np.arange(0,360,45)
-    column1 = np.zeros(8)
-    dir_spike_count = np.column_stack((column0, column1))
-    
-    # create array to store spikes per trial
-    spikes_per_trial = np.zeros(len(trials))
-   
-    # iterate through all the trials
-    for i in range(0, len(trials)):
-        # get direction and determine time window to count spikes
-        direction = trials[i,0]
-        start_time = trials[i,1] - time_bin
-        stop_time = trials[i,1] + time_bin
-        
-        # check all spike times to see if they are in the time window
-        for j in range(0, len(spk_times)):
-            if (start_time <= spk_times[j] <= stop_time):
-                # if spike is in time window count it!
-                spikes_per_trial[i] = spikes_per_trial[i] + 1
-                
-    
-    # create output data structure (firing rate)
-    column0 = np.arange(0,360,45)
-    column1 = np.zeros(8)
-    dir_rates = np.column_stack((column0, column1))
-  
-    # calculate number of trials per direction  
-    dir_trial_count = count_trials(trials)
-    
-    # convert counts to average firing rate       
-    for i in range(0, len(dir_spike_count)):
-        dir_rates[i,1] = dir_spike_count[i,1]/(2*time_bin)
-        dir_rates[i,1] = dir_spike_count[i,1]/dir_trial_count[i,1]
-        
-    return dir_rates
-    
 def plot_tuning_curves(direction_rates, title):
     """
     This function takes the x-values and the y-values  in units of spikes/s 
