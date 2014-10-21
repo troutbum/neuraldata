@@ -50,7 +50,7 @@ def bin_spikes(trials, spk_times, time_bin):
     AVG ISSUES:  counting all spikes per direction then normalizing
                  instead, should count by trial then avg over trials
     """
-    # create data structure (spike count)
+    # create array to store (sum of spike counts per direction)
     column0 = np.arange(0,360,45)
     column1 = np.zeros(8)
     dir_spike_count = np.column_stack((column0, column1))
@@ -72,34 +72,20 @@ def bin_spikes(trials, spk_times, time_bin):
                 for k in range(0, len(dir_spike_count)):
                     if (dir_spike_count[k,0] == direction):
                         dir_spike_count[k,1] = dir_spike_count[k,1] + 1
-    
-    print(dir_spike_count)    
-    
+         
     # create output data structure (firing rate)
     column0 = np.arange(0,360,45)
     column1 = np.zeros(8)
     dir_rates = np.column_stack((column0, column1))
   
-    # calculate number of trials per direction  
+    # Call function to calculate number of trials per direction
+    # (17 each direction in this data)
     dir_trial_count = count_trials(trials)
     
-    print(dir_trial_count)
-    
-    # convert counts to average firing rate       
+    # convert counts to average firing rate (spikes/s)  
     for i in range(0, len(dir_spike_count)):
         dir_rates[i,1] = dir_spike_count[i,1]/(2*time_bin)
         dir_rates[i,1] = dir_rates[i,1]/dir_trial_count[i,1] 
-    
-#    print(dir_rates) 
-#    
-#    print(dir_rates[2,1])
-#    print(dir_trial_count[2,1])
-#    print(dir_rates[2,1]/dir_trial_count[2,1])
-#    
-#    for i in range(0, len(dir_spike_count)):    
-#        dir_rates[i,1] = dir_rates[i,1]/dir_trial_count[i,1]     
-#        
-#    print(dir_rates)
     
     return dir_rates
     
