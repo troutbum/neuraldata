@@ -116,12 +116,14 @@ def plot_tuning_curves(direction_rates, title):
     (found in the two columns of direction_rates) and plots a histogram and 
     polar representation of the tuning curve. It adds the given title.
     """
-    # histogram
+    # create a new figure
+    plt.figure()    
     
-    # create two plots in one figure (1 row, 2 cols)
+    # create two plots in one figure (1 row, 2 cols)    
     plt.subplot(1,2,1)
     #plt.figure(1)
     
+    # histogram
     plt.bar(direction_rates[:,0],direction_rates[:,1], width=45,align='center')     
     plt.xlabel('Direction of Motion (degrees)')
     plt.ylabel('Firing Rate (spike/s)')
@@ -160,23 +162,28 @@ def roll_axes(direction_rates):
     returned list should be set to be the same. (See problem set directions)
     Hint: Use np.roll()
     """
-    # make a copy of array
-    temp_array = direction_rates*1
-    x = temp_array[:,0]
-    y = temp_array[:,1]
+    # make a copy of input data array
+    # and place into x and y rrays
+    dataIn = direction_rates*1
+    new_xs = dataIn[:,0]
+    new_ys = dataIn[:,1]
     
     # calculate number of shifts to center max y value
-    shifts = 4 - np.argmax(y)    
-    new_ys = np.roll(y, shifts)
+    #   np.argmax() determines the array index of the max value
+    shifts = 4 - np.argmax(new_ys)    
+    new_ys = np.roll(new_ys, shifts)
     new_ys = np.append(new_ys, new_ys[0])
     
     # rolled degrees = shifts * 45 degrees    
-    roll_degrees = shifts * 45    
+    roll_degrees = shifts * 45 
     
-    # roll x-axis the same number of shifts
-    new_xs = np.roll(x, shifts)
-    new_xs = np.append(new_xs, new_xs[0])
-    
+    # roll x-axis by subtracting the "roll degrees"  
+    for i in range(0,len(new_xs)):
+        new_xs[i] = new_xs[i] - roll_degrees
+   
+    # add 45 to rightmost x[n] and append it
+    new_xs = np.append(new_xs, new_xs[7] + 45)
+        
     return new_xs, new_ys, roll_degrees    
     
 
@@ -236,5 +243,12 @@ if __name__ == "__main__":
     # run analysis and create histogram
     direction_rates = bin_spikes(trials,spk_times,0.1)
     plot_tuning_curves(direction_rates, 'Tuning Curve')
+    
+    # roll axes to center histogram
+    new_xs, new_ys, roll_degrees = roll_axes(direction_rates)
+    plt.figure()
+    plt.bar(new_xs, new_ys)
+
+    
 
 
