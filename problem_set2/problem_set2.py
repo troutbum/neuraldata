@@ -116,7 +116,10 @@ def plot_tuning_curves(direction_rates, title):
     (found in the two columns of direction_rates) and plots a histogram and 
     polar representation of the tuning curve. It adds the given title.
     """
-    plt.bar(direction_rates[:,0],direction_rates[:,1], width=45,align='center')
+    # histogram
+    #plt.figure(1)
+    plt.subplot(1,2,1)
+    plt.bar(direction_rates[:,0],direction_rates[:,1], width=45,align='center')     
     plt.xlabel('Direction of Motion (degrees)')
     plt.ylabel('Firing Rate (spike/s)')
     plt.title(title)
@@ -125,6 +128,24 @@ def plot_tuning_curves(direction_rates, title):
     plt.xticks(np.arange(0,360,45))
     plt.xlim(-22.5, 337.5)
     
+#   # polar plot
+    #plt.figure(2)
+    plt.subplot(1,2,2,polar=True)
+    polar_data = direction_rates
+#   # convert degrees to radians 
+    for i in range(0, len(polar_data)):
+        polar_data[i,0] = np.deg2rad(polar_data[i,0])
+    
+    theta = polar_data[:,0]
+    r = polar_data[:,1]
+    # append data to connect 315 to 360 
+    r2 = np.append(r,r[0])
+    theta2 = np.append(theta,theta[0])
+    
+    plt.polar(theta2, r2, label='Firing Rate (spikes/s)')
+    plt.legend(loc=8)
+    plt.title(title)
+       
 def roll_axes(direction_rates):
     """
     roll_axes takes the x-values (directions) and y-values (direction_rates)
