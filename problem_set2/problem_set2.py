@@ -117,8 +117,11 @@ def plot_tuning_curves(direction_rates, title):
     polar representation of the tuning curve. It adds the given title.
     """
     # histogram
-    #plt.figure(1)
+    
+    # create two plots in one figure (1 row, 2 cols)
     plt.subplot(1,2,1)
+    #plt.figure(1)
+    
     plt.bar(direction_rates[:,0],direction_rates[:,1], width=45,align='center')     
     plt.xlabel('Direction of Motion (degrees)')
     plt.ylabel('Firing Rate (spike/s)')
@@ -129,9 +132,12 @@ def plot_tuning_curves(direction_rates, title):
     plt.xlim(-22.5, 337.5)
     
 #   # polar plot
-    #plt.figure(2)
     plt.subplot(1,2,2,polar=True)
-    polar_data = direction_rates
+    #plt.figure(2)
+    
+    # copy the array to a new array
+    polar_data = direction_rates*1
+    
 #   # convert degrees to radians 
     for i in range(0, len(polar_data)):
         polar_data[i,0] = np.deg2rad(polar_data[i,0])
@@ -154,7 +160,22 @@ def roll_axes(direction_rates):
     returned list should be set to be the same. (See problem set directions)
     Hint: Use np.roll()
     """
-   
+    # make a copy of array
+    temp_array = direction_rates*1
+    x = temp_array[:,0]
+    y = temp_array[:,1]
+    
+    # calculate number of shifts to center max y value
+    shifts = 4 - np.argmax(y)    
+    new_ys = np.roll(y, shifts)
+    new_ys = np.append(new_ys, new_ys[0])
+    
+    # rolled degrees = shifts * 45 degrees    
+    roll_degrees = shifts * 45    
+    
+    # roll x-axis the same number of shifts
+    new_xs = np.roll(x, shifts)
+    new_xs = np.append(new_xs, new_xs[0])
     
     return new_xs, new_ys, roll_degrees    
     
@@ -213,7 +234,7 @@ if __name__ == "__main__":
     trialsPerDirection = count_trials(trials)
     
     # run analysis and create histogram
-    output = bin_spikes(trials,spk_times,0.1)
-    plot_tuning_curves(output, 'Tuning Curve')
+    direction_rates = bin_spikes(trials,spk_times,0.1)
+    plot_tuning_curves(direction_rates, 'Tuning Curve')
 
 
