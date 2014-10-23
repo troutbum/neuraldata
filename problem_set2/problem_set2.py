@@ -285,18 +285,17 @@ def roll_fit_unroll(direction_rates):
 if __name__ == "__main__":
     trials = load_experiment('trials.npy')   
     spk_times = load_neuraldata('example_spikes.npy') 
-    
-    
+      
     # run analysis and create histogram
     direction_rates = bin_spikes(trials,spk_times,0.1)
-    plot_tuning_curves(direction_rates, 'Tuning Curve')
+    plot_tuning_curves(direction_rates, 'Example Tuning Curve')
     
     # fit data to a normal distribution
     fit_curve = roll_fit_unroll(direction_rates)
        
     # call plotting function
     plot_fits(direction_rates,fit_curve,
-              title='Neuron Tuning Curve - Centered')
+              title='Example Neuron Tuning Curve - Centered')
     
     
     
