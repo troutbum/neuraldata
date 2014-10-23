@@ -246,10 +246,26 @@ def plot_fits(direction_rates,fit_curve,title):
     r2 = np.append(r,r[0])
     theta2 = np.append(theta,theta[0])
     
-    plt.polar(theta2, r2, label='Firing Rate (spikes/s)')
-    plt.legend(loc=8)
-    plt.title(title)    
+    plt.polar(theta2, r2, 'bo')
+      
+    # plot fitted curve data
+    polar_fdata = fit_curve*1
     
+    # convert degrees to radians 
+    for i in range(0, len(polar_fdata)):
+        polar_fdata[i,0] = np.deg2rad(polar_fdata[i,0])
+    
+    theta = polar_fdata[:,0]
+    r = polar_fdata[:,1]
+    
+    # append data to connect 315 to 360 
+    r2 = np.append(r,r[0])
+    theta2 = np.append(theta,theta[0])
+    
+    plt.polar(theta2, r2, color='g', label='Firing Rate (spikes/s)')
+    
+    plt.legend(loc=8)
+    plt.title(title)  
     
 
 def von_mises_fitfunc(x, A, kappa, l, s):
@@ -266,7 +282,14 @@ def preferred_direction(fit_curve):
     in the first column and the y-values of the fit curve in the second.  
     It returns the preferred direction of the neuron (in degrees).
     """
-  
+    # What is the biggest y-value?
+    max_y = np.amax(fit_curve[:,1])      
+    #print ('max y =' + str(max_y))
+
+    # Where is the biggest y-value?
+    pd = fit_curve[np.argmax(fit_curve[:,1])] 
+    #print ('preferred direction =' + str(pd[0]))
+    
     return pd
  
 def roll_fit_unroll(direction_rates):
@@ -318,6 +341,6 @@ if __name__ == "__main__":
     plot_fits(direction_rates,fit_curve,
               title='Example Neuron Tuning Curve - Centered')
     
-    
-    
+    pd = preferred_direction(fit_curve)
+    print ('preferred direction = ' + str(pd[0]))
 
