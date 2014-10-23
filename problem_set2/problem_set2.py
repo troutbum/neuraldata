@@ -47,8 +47,6 @@ def bin_spikes(trials, spk_times, time_bin):
     (in degrees from 0-360) and the second column containing the average firing rate
     for each direction
     
-    AVG ISSUES:  counting all spikes per direction then normalizing
-                 instead, should count by trial then avg over trials
     """
     # create array to store (sum of spike counts per direction)
     column0 = np.arange(0,360,45)
@@ -191,7 +189,7 @@ def normal_fit(x,mu, sigma, A):
     """
     This creates a normal curve over the values in x with mean mu and
     variance sigma.  It is scaled up to height A.
-    """
+    """  
     n = A*mlab.normpdf(x,mu,sigma)
     return n
 
@@ -200,10 +198,21 @@ def fit_tuning_curve(centered_x,centered_y):
     This takes our rolled curve, generates the guesses for the fit function,
     and runs the fit.  It returns the parameters to generate the curve.
     """
+    # What is the biggest y-value? (estimates the amplitude of the curve, A)
+    max_y = np.amax(centered_y)      
+
+    # Where is the biggest y-value? (estimates the mean of the curve, mu)
+    max_x = centered_x[np.argmax(centered_y)]
+    
+    # Approximating one standard deviation of our normal distribution
+    #(which should be around the width of 2 bars).
+    sigma = 90              
+
+    p, cov = optimize.curve_fit(normal_fit,centered_x, centered_y, 
+                                p0=[max_x, sigma, max_y])
 
     return p
     
-
 
 def plot_fits(direction_rates,fit_curve,title):
     """
@@ -212,6 +221,14 @@ def plot_fits(direction_rates,fit_curve,title):
     actual values with circles, and the curves as lines in both linear and 
     polar plots.
     """
+    plt.figure()
+    plt.plot(direction_rates[:,0], direction_rates[:,1], 'bo')
+    plt.xlabel('Direction of Motion (degrees)')
+    plt.ylabel('Firing Rate (spike/s)')
+    plt.title(title)
+
+    plt.plot(fit_curve[:,0], fit_curve[:,1], color='g')  
+    
     
 
 def von_mises_fitfunc(x, A, kappa, l, s):
@@ -230,25 +247,57 @@ def preferred_direction(fit_curve):
     """
   
     return pd
+ 
+def roll_fit_unroll(direction_rates):
+    """
+    A function that does the rolling, fitting, and rolling back
+    operations used to fit the data to a normal distribution curve
     
-        
+    Input - array of average firing rate for each of 8 direction. 
+    Output - array of normal fitted firing rates for each direction 
+            360 degrees
+    """    
+    # roll axes to center histogram
+    # remember roll_degrees to unroll after fitting process
+    new_xs, new_ys, roll_degrees = roll_axes(direction_rates)
+    
+    # fit rolled curve to normal distribution
+    p = fit_tuning_curve(new_xs, new_ys)
+    
+    # create smooth curve with many x-axis pointswith default step = 1
+    curve_xs = np.arange(new_xs[0],new_xs[-1])
+    
+    # create the fitted normal curve with calculated p parameters    
+    curve_fit_ys = normal_fit(curve_xs,p[0],p[1],p[2])
+    
+    # unroll fitted curve to original axes
+    unrolled_ys = np.roll(curve_fit_ys, -(roll_degrees))    
+    unrolled_xs = curve_xs + roll_degrees
+    
+    # package fitted curve for plotting    
+    fit_curve = np.column_stack((unrolled_xs, unrolled_ys))
+    
+    return fit_curve
+
+    
 ##########################
 #You can put the code that calls the above functions down here    
 if __name__ == "__main__":
     trials = load_experiment('trials.npy')   
     spk_times = load_neuraldata('example_spikes.npy') 
     
-    trialsPerDirection = count_trials(trials)
     
     # run analysis and create histogram
     direction_rates = bin_spikes(trials,spk_times,0.1)
     plot_tuning_curves(direction_rates, 'Tuning Curve')
     
-    # roll axes to center histogram
-    new_xs, new_ys, roll_degrees = roll_axes(direction_rates)
-    plt.figure()
-    plt.bar(new_xs, new_ys)
-
+    # fit data to a normal distribution
+    fit_curve = roll_fit_unroll(direction_rates)
+       
+    # call plotting function
+    plot_fits(direction_rates,fit_curve,
+              title='Neuron Tuning Curve - Centered')
     
-
+    
+    
 
