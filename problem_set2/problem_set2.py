@@ -274,7 +274,6 @@ def von_mises_fitfunc(x, A, kappa, l, s):
     """
     return A*stats.vonmises.pdf(x, kappa, loc=l, scale=s)
 
-
     
 def preferred_direction(fit_curve):
     """
