@@ -119,7 +119,6 @@ def plot_tuning_curves(direction_rates, title):
     
     # create two plots in one figure (1 row, 2 cols)    
     plt.subplot(1,2,1)
-    #plt.figure(1)
     
     # histogram
     plt.bar(direction_rates[:,0],direction_rates[:,1], width=45,align='center')     
@@ -133,7 +132,6 @@ def plot_tuning_curves(direction_rates, title):
     
 #   # polar plot
     plt.subplot(1,2,2,polar=True)
-    #plt.figure(2)
     
     # copy the array to a new array
     polar_data = direction_rates*1
@@ -222,12 +220,35 @@ def plot_fits(direction_rates,fit_curve,title):
     polar plots.
     """
     plt.figure()
+    # create two plots in one figure (1 row, 2 cols)    
+    plt.subplot(1,2,1)
+    
     plt.plot(direction_rates[:,0], direction_rates[:,1], 'bo')
     plt.xlabel('Direction of Motion (degrees)')
     plt.ylabel('Firing Rate (spike/s)')
     plt.title(title)
 
-    plt.plot(fit_curve[:,0], fit_curve[:,1], color='g')  
+    plt.plot(fit_curve[:,0], fit_curve[:,1], color='g')
+    
+    # polar plot
+    plt.subplot(1,2,2,polar=True)
+    
+    # copy the array to a new array
+    polar_data = direction_rates*1
+    
+    # convert degrees to radians 
+    for i in range(0, len(polar_data)):
+        polar_data[i,0] = np.deg2rad(polar_data[i,0])
+    
+    theta = polar_data[:,0]
+    r = polar_data[:,1]
+    # append data to connect 315 to 360 
+    r2 = np.append(r,r[0])
+    theta2 = np.append(theta,theta[0])
+    
+    plt.polar(theta2, r2, label='Firing Rate (spikes/s)')
+    plt.legend(loc=8)
+    plt.title(title)    
     
     
 
