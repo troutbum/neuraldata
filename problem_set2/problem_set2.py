@@ -118,7 +118,7 @@ def plot_tuning_curves(direction_rates, title):
     plt.figure()    
     
     # create two plots in one figure (1 row, 2 cols)    
-    plt.subplot(1,2,1)
+    plt.subplot(2,2,1)
     
     # histogram
     plt.bar(direction_rates[:,0],direction_rates[:,1], width=45,align='center')     
@@ -131,7 +131,7 @@ def plot_tuning_curves(direction_rates, title):
     plt.xlim(-22.5, 337.5)
     
 #   # polar plot
-    plt.subplot(1,2,2,polar=True)
+    plt.subplot(2,2,2,polar=True)
     
     # copy the array to a new array
     polar_data = direction_rates*1
@@ -147,7 +147,7 @@ def plot_tuning_curves(direction_rates, title):
     theta2 = np.append(theta,theta[0])
     
     plt.polar(theta2, r2, label='Firing Rate (spikes/s)')
-    plt.legend(loc=8)
+    plt.legend(loc=0) # 0 - best, 8- lower center
     plt.title(title)
        
 def roll_axes(direction_rates):
@@ -219,19 +219,20 @@ def plot_fits(direction_rates,fit_curve,title):
     actual values with circles, and the curves as lines in both linear and 
     polar plots.
     """
-    plt.figure()
+    #plt.figure()
     # create two plots in one figure (1 row, 2 cols)    
-    plt.subplot(1,2,1)
+    plt.subplot(2,2,3)
     
     plt.plot(direction_rates[:,0], direction_rates[:,1], 'bo')
     plt.xlabel('Direction of Motion (degrees)')
     plt.ylabel('Firing Rate (spike/s)')
     plt.title(title)
+    plt.xlim(-5, 365)
 
     plt.plot(fit_curve[:,0], fit_curve[:,1], color='g')
     
     # polar plot
-    plt.subplot(1,2,2,polar=True)
+    plt.subplot(2,2,4,polar=True)
     
     # copy the array to a new array
     polar_data = direction_rates*1
@@ -264,7 +265,7 @@ def plot_fits(direction_rates,fit_curve,title):
     
     plt.polar(theta2, r2, color='g', label='Firing Rate (spikes/s)')
     
-    plt.legend(loc=8)
+    plt.legend(loc=0)  # 0 - best, 8- lower center
     plt.title(title)  
     
 
@@ -322,24 +323,65 @@ def roll_fit_unroll(direction_rates):
     
     return fit_curve
 
+def run_analysis(trial_file, spikes_file, title_name):
+    '''
+    This function runs the complete analysis and plots the results.
+    Allows you to batch up multiple runs in main program.    
     
-##########################
-#You can put the code that calls the above functions down here    
-if __name__ == "__main__":
-    trials = load_experiment('trials.npy')   
-    spk_times = load_neuraldata('example_spikes.npy') 
+    Input - 
+        trials = direction and time when the monkey moved the joystick
+        spk_times = processed data of detected neuron spike times 
+    Output - 
+        histogram and polar plot of data and fitted curve
+    '''
+    # load data files
+    trials = load_experiment(trial_file)   
+    spk_times = load_neuraldata(spikes_file) 
       
     # run analysis and create histogram
     direction_rates = bin_spikes(trials,spk_times,0.1)
-    plot_tuning_curves(direction_rates, 'Example Tuning Curve')
+    plot_tuning_curves(direction_rates, title_name)
     
     # fit data to a normal distribution
     fit_curve = roll_fit_unroll(direction_rates)
        
     # call plotting function
     plot_fits(direction_rates,fit_curve,
-              title='Example Neuron Tuning Curve - Centered')
+              title=title_name + ' - Fit')
     
+    # determine preferred direction of neuron
     pd = preferred_direction(fit_curve)
-    print ('preferred direction = ' + str(pd[0]))
+    print ('preferred direction = ' + str(pd[0]))   
+    
+    
+##########################
+#You can put the code that calls the above functions down here    
+if __name__ == "__main__":
+#    trials = load_experiment('trials.npy')   
+#    spk_times = load_neuraldata('example_spikes.npy') 
+#      
+#    # run analysis and create histogram
+#    direction_rates = bin_spikes(trials,spk_times,0.1)
+#    plot_tuning_curves(direction_rates, 'Example Neuron Tuning Curve')
+#    
+#    # fit data to a normal distribution
+#    fit_curve = roll_fit_unroll(direction_rates)
+#       
+#    # call plotting function
+#    plot_fits(direction_rates,fit_curve,
+#              title='Example Neuron Tuning Curve - Fit')
+#    
+#    pd = preferred_direction(fit_curve)
+#    print ('preferred direction = ' + str(pd[0]))
 
+    run_analysis('trials.npy','example_spikes.npy',
+                 'Example Neuron Tuning Curve')
+    
+    run_analysis('trials.npy','neuron1.npy',
+                 'Neuron 1 Tuning Curve')
+                 
+    run_analysis('trials.npy','neuron2.npy',
+                 'Neuron 2 Tuning Curve')
+    
+    run_analysis('trials.npy','neuron3.npy',
+                 'Neuron 3 Tuning Curve')             
