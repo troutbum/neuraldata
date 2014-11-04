@@ -107,8 +107,8 @@ def plot_rts(df):
 
     # And add plot details (title, legend, xlabel, and ylabel)
     plt.title('Mean of All Reaction Times')
-    plt.xlabel('Target Eccentricity (degrees)')
-    plt.ylabel('Reaction Time (milliseconds)')
+    plt.xlabel('Target Eccentricity (degrees visual angle)')
+    plt.ylabel('Time (milliseconds)')
     plt.legend(loc=0) # 0 - best, 4- lower right
 
 ##
@@ -131,43 +131,31 @@ def get_ems(df, trial):
     ####  to get the time the stimulus appeared on trial 14, you would write:
     ####    df['stimon'][14]
 
-    # t = *** YOUR CODE HERE ***
-    
-    #data = df['response'][trial] <= df[['em_time']][trial] <= df['response'][trial]
-    
-    #df[['em_time']].where(df['em_time'] < df['stimon'])
-    
-    
-    # 
-    #trial = 4
-    #df.loc[trial, 'em_time']
-    
-    # get data for trial (row)
-    #df2 = df.loc[trial, :]
-    
     # find times of interest for trial
+    #   'stimon' - when stimulus appeared 
+    #   'response' - when subject responded
     startTime = df.loc[trial, 'stimon']
-    endTime = df.loc[trial, 'response']
-    
+    endTime = df.loc[trial, 'response']  
  
     # extract times
     times = df['em_time'][trial]
     
-    # find index    
+    # find index of 'stimon' - when stimulus appeared  
     indexStart = 0
     for i in range(0, len(times)):
         if times[i] < startTime:
             indexStart = indexStart +1
     print indexStart
 
-    # find index
+    # find index of 'response' - when subject responded
     indexEnd = 0
     for i in range(0, len(times)):
         if times[i] < endTime:
             indexEnd = indexEnd +1
     print indexEnd
     
-    # extract data
+    # extract data 
+    # based on start and end indices
     t = times[indexStart:indexEnd]
     print len(t)
     
@@ -178,33 +166,6 @@ def get_ems(df, trial):
     vert = df['em_vert'][trial]
     v = vert[indexStart:indexEnd]
     print len(v)
-
-#    # find index of start time
-#    times = int(times)
-#    times.index(startTime)
-#    
-#    itemindex = numpy.where(times==startTime)
-#    
-#    
-#    df2.ix[startTime:endTime]  
-    
-    #trialData.where(trialData['em_time'] < endTime)
-    #trialData.query(trialData['em_time'] < endTime)
-    #trialData.index.name = 
-#    trialData.query('em_time < endTime')
-#    
-#    
-#    df2.ix[:date2]    
-#    
-#    trialData[:5]
-#    
-#    t = trialData[['em_time']]
-#    
-#    
-#    trialData[[1,'em_time']]
-
-    # h = *** YOUR CODE HERE ***
-    # v = *** YOUR CODE HERE ***
 
     return t, h, v
 
@@ -227,7 +188,27 @@ def plot_ems_and_target(df, trial):
     plt.figure()
 
     # *** YOUR CODE HERE ***
+    plt.plot(t,h,'r',t,v,'g')   
+    # alternate way for multiple lines
+    #  plt.plot(t,h, c='r')
+    #  plt.plot(t,v, c='g', hold=True)
+    plt.axhline(y=df['targ_x'][trial], c='r')
+    plt.axhline(y=df['targ_y'][trial], c='g') 
+    plt.ylim(-10, 10)     
 
+    print 'targ_x = ' + str(df['targ_x'][trial])
+    print 'targ_y = ' + str(df['targ_y'][trial])
+    
+    plt.title('Eye Movements for Trial ' + str(trial))
+    plt.xlabel('Position (degrees visual angle)')
+    plt.ylabel('Time (milliseconds)')
+     
+    #plt.legend()  
+    # legend not working!  use more kluginess
+    import matplotlib.lines as mlines
+    h_legend = mlines.Line2D([], [], color='red', label='Horizontal')
+    v_legend = mlines.Line2D([], [], color='green', label='Vertical')
+    plt.legend(handles=[h_legend, v_legend], loc=0)     
     plt.show()
     
 
@@ -249,13 +230,20 @@ def get_rate(spk_times, start, stop):
     # Remember that rate should be in the units spikes/sec
     # but start and stop are in msec (.001 sec)
 
-    # rate = 
+    # Use this to extract spike times series for trial
+    #
+    # spikeTimes = df['spk_times'][trial]
+    
+    spikes = np.count_nonzero((spk_times > start) & (spk_times <= stop))
+    tInterval = stop - start 
+    rate = (spikes / (tInterval * 1.0)) * 1000
 
     return rate
 
 
 ##
-## This function should not need to be edited
+## This function should
+ not need to be edited
 ##
 def add_aligned_rates(df, alignto, start, stop):
     """Use the get_rate() function to add rates to a DataFrame where the
@@ -339,3 +327,5 @@ if __name__ == "__main__":
     add_info(df)
     rts_by_targ_ecc(df)
     plot_rts(df)
+    trial = 213
+    plot_ems_and_target(df, trial)
