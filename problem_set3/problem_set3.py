@@ -47,7 +47,7 @@ def add_info(df):
     # Uncomment the following line and add the df['rts'] column 
     #   Hint: refer to df['stimon'] and df['response'] !!!
 
-    # df['rts'] = *** YOUR CODE HERE ***
+    df['rts'] = df['response'] - df['stimon']
 
 
     # b. Target Eccentricity
@@ -60,9 +60,8 @@ def add_info(df):
     #          To square an array, you can multiply it by itself or do array**2
     #          You can use np.sum (or +), np.sqrt, and np.round here
 
-    # df['targ_ecc'] = *** YOUR CODE_HERE ***
-
-
+    df['targ_ecc'] = np.round(np.sqrt(df['targ_x']**2 + 
+                        df['targ_y']**2), decimals=0)
 
     # Leave this here - it adds information used for Exercise 5
     add_acq_time(df)
@@ -82,7 +81,7 @@ def rts_by_targ_ecc(df):
     ####        Use the pandas "pivot_table" command to summarize data
     ####
 
-    # results = df.pivot_table( *** YOUR CODE HERE *** )
+    results = df.pivot_table(values='rts', index='targ_ecc')
 
     return results
 
@@ -98,13 +97,19 @@ def plot_rts(df):
     #### Programming Problem 3: Use the pandas to create barchart of sorted rts
     ####
 
-    # df['side_name'] = ### YOUR CODE HERE
+    df['side_name'] = np.choose(df['side'],['left','right'])
 
     # Now create a pivot table (specifying values, index, and columns)
+    results = df.pivot_table(values='rts', index='targ_ecc', columns='side_name')
 
     # And now plot that pivot table
+    results.plot(kind='bar')
 
     # And add plot details (title, legend, xlabel, and ylabel)
+    plt.title('Mean of All Reaction Times')
+    plt.xlabel('Target Eccentricity (degrees)')
+    plt.ylabel('Reaction Time (milliseconds)')
+    plt.legend(loc=0) # 0 - best, 4- lower right
 
 ##
 ## This function should be edited as part of Exercise 4
@@ -127,6 +132,77 @@ def get_ems(df, trial):
     ####    df['stimon'][14]
 
     # t = *** YOUR CODE HERE ***
+    
+    #data = df['response'][trial] <= df[['em_time']][trial] <= df['response'][trial]
+    
+    #df[['em_time']].where(df['em_time'] < df['stimon'])
+    
+    
+    # 
+    #trial = 4
+    #df.loc[trial, 'em_time']
+    
+    # get data for trial (row)
+    #df2 = df.loc[trial, :]
+    
+    # find times of interest for trial
+    startTime = df.loc[trial, 'stimon']
+    endTime = df.loc[trial, 'response']
+    
+ 
+    # extract times
+    times = df['em_time'][trial]
+    
+    # find index    
+    indexStart = 0
+    for i in range(0, len(times)):
+        if times[i] < startTime:
+            indexStart = indexStart +1
+    print indexStart
+
+    # find index
+    indexEnd = 0
+    for i in range(0, len(times)):
+        if times[i] < endTime:
+            indexEnd = indexEnd +1
+    print indexEnd
+    
+    # extract data
+    t = times[indexStart:indexEnd]
+    print len(t)
+    
+    horiz = df['em_horiz'][trial]
+    h = horiz[indexStart:indexEnd]
+    print len(h)
+    
+    vert = df['em_vert'][trial]
+    v = vert[indexStart:indexEnd]
+    print len(v)
+
+#    # find index of start time
+#    times = int(times)
+#    times.index(startTime)
+#    
+#    itemindex = numpy.where(times==startTime)
+#    
+#    
+#    df2.ix[startTime:endTime]  
+    
+    #trialData.where(trialData['em_time'] < endTime)
+    #trialData.query(trialData['em_time'] < endTime)
+    #trialData.index.name = 
+#    trialData.query('em_time < endTime')
+#    
+#    
+#    df2.ix[:date2]    
+#    
+#    trialData[:5]
+#    
+#    t = trialData[['em_time']]
+#    
+#    
+#    trialData[[1,'em_time']]
+
     # h = *** YOUR CODE HERE ***
     # v = *** YOUR CODE HERE ***
 
@@ -260,3 +336,6 @@ def add_acq_time(df):
 # Code to run for testing if this module is run directly
 if __name__ == "__main__":
     df = load_data()
+    add_info(df)
+    rts_by_targ_ecc(df)
+    plot_rts(df)
