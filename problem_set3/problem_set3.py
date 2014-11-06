@@ -106,9 +106,9 @@ def plot_rts(df):
     results.plot(kind='bar')
 
     # And add plot details (title, legend, xlabel, and ylabel)
-    plt.title('Mean of All Reaction Times')
+    plt.title('Reaction Times By Eccentricity & Side')
     plt.xlabel('Target Eccentricity (degrees visual angle)')
-    plt.ylabel('Time (milliseconds)')
+    plt.ylabel('Reaction Time (milliseconds)')
     plt.legend(loc=0) # 0 - best, 4- lower right
 
 ##
@@ -242,8 +242,7 @@ def get_rate(spk_times, start, stop):
 
 
 ##
-## This function should
- not need to be edited
+## This function should not need to be edited
 ##
 def add_aligned_rates(df, alignto, start, stop):
     """Use the get_rate() function to add rates to a DataFrame where the
@@ -327,5 +326,24 @@ if __name__ == "__main__":
     add_info(df)
     rts_by_targ_ecc(df)
     plot_rts(df)
-    trial = 213
-    plot_ems_and_target(df, trial)
+#    trial = 213
+#    plot_ems_and_target(df, trial)
+    
+    # get firing rates around "stimulus on" event
+    add_aligned_rates(df, 'stimon' ,100, 200)
+    
+    # pivot table analysis - run in console for graphics   
+    results1 = df.pivot_table(values='rates_stimon_100_200', index='targ', 
+                              columns='targ_ecc')
+    results1.plot(kind='bar')
+                          
+    # this trial shows nice 3 eye movement target acquistion
+    plot_ems_and_target(df, 303)
+    
+    # get firing rates around "target acquired" event
+    add_aligned_rates(df, 'targ_acq' ,100, 200)     
+
+    # pivot table analysis - run in console for graphics
+    results2 = df.pivot_table(values='rates_targ_acq_100_200', index='targ', 
+                              columns='targ_ecc')               
+    results2.plot(kind='bar')                     
