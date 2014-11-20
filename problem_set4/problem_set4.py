@@ -136,28 +136,40 @@ def classify_epoch(epoch,rate):
     """
 
     ###YOUR CODE HERE
-
-    ## Better Classifier - Cummulative Power Distribution
-    ## find where cummulative power exceeds threshold %
-    threshold = 0.966
-    #print('Cumulative Power - Threshold set to ' + str(threshold*100)+'%')
+    
+    
+    # Adjust these frequency parameters to tune classifier
+    # for Stage 3/4
+    # Most of power contained in a small low freq range   
    
+    fLoPowerCutoff = 6       # low frequency cutoff for Stage 3/4   
+    loPowerPercent = 0.966  # % of total power in below cutoff
+  
+    # Adjust to tune classifier
+    # for Stage 2 
+    # look for "sleep spindles" in a band for 11-15 Hz  
+    fLoBand = 11             # freq to tune band for Stage 2
+    fHiBand = 15             # freq to tune band for Stage 2
+    bandPowerPercent = 0.04  # threshold criteria for power in band
+
+  
+  
     # iterate over each example data set
     Pxx, freqs = m.psd(epoch, NFFT=512, Fs=rate)
     
     # normalize PSD
     normalizedPxx = Pxx/sum(Pxx)
   
-    # determine cummulative power distribution 
+    # Find cutoff freq (f) where total low power is contained
     sumPxx = 0    
     j = 0        
-    while sumPxx <= threshold:
+    while sumPxx <= loPowerPercent:
         sumPxx = sumPxx + normalizedPxx[j]
         j = j + 1    
  
     # stop when cummulative power exceeds threshold %
     #print('Threshold Met at Frequency = '+str(freqs[j])+' Hz')
-    threshFreq = freqs[j]
+    f = freqs[j]
     
 #    RESULTS CALCULATED FROM EXAMPLES[]
 #    
@@ -172,21 +184,23 @@ def classify_epoch(epoch,rate):
 #    Stage 2 NREM sleep - Threshold Met at Frequency = 13.0 Hz
 #    Stage 3 and 4 NREM sleep - Threshold Met at Frequency = 3.75 Hz
  
-    lowClassifier = 6
-    hiClassifier = 11
- 
+    # requires Python/Numpy gymnastics to find index.
+    # first convert to numpy to list then call index() 
+    indexLo = freqs.tolist().index(fLoBand)
+    indexHi = freqs.tolist().index(fHiBand)
+
     ## if most of the power is very low, then Stage 3/4 NREM
-    if threshFreq <= lowClassifier:
+    if f <= fLoPowerCutoff:
         stage = 3
-     
+      
     ## Stage 2 NREM contains significant "sleep spindles"
-    ## at 11-15 Hz 
-    elif threshFreq >= hiClassifier:
+    ## at 11-15 Hz     
+    elif sum(normalizedPxx[indexLo:indexHi]) >= bandPowerPercent:
         stage = 2
 
     ## Stage 1 NREM otherwise (similar to REM)
     else:
-        stage =1
+        stage = 1
     
     return stage
 
