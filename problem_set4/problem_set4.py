@@ -139,9 +139,8 @@ def classify_epoch(epoch,rate):
 
     ## Better Classifier - Cummulative Power Distribution
     ## find where cummulative power exceeds threshold %
-    threshold = 0.95
-    print('Cumulative Power Distribution (starting at 0 Hz) ')
-    print('Threshold set to ' + str(threshold*100)+'%')
+    threshold = 0.966
+    print('Cumulative Power - Threshold set to ' + str(threshold*100)+'%')
    
     # iterate over each example data set
     Pxx, freqs = m.psd(epoch, NFFT=512, Fs=rate)
@@ -200,18 +199,26 @@ def plot_hypnogram(eeg, stages, srate):
     fig,ax1 = plt.subplots()  #Needed for the multiple y-axes
     
     #Use the specgram function to draw the spectrogram as usual
-
+       
+    Pxx, freqs, bins, im = plt.specgram(eeg,NFFT=512,Fs=srate)       
+        
     #Label your x and y axes and set the y limits for the spectrogram
+    plt.ylim(0,30)
+    plt.xlabel('Time (Seconds)')
+    plt.ylabel('Frequency (Hz)')
     
     ax2 = ax1.twinx() #Necessary for multiple y-axes
     
     #Use ax2.plot to draw the hypnogram.  Be sure your x values are in seconds
     #HINT: Use drawstyle='steps' to allow step functions in your plot
-
+    
+    times = np.arange(0,len(classifiedEEG)*30, 30, drawstyle='steps')   
+    ax2.plot(times, stages)
+    
     #Label your right y-axis and change the text color to match your plot
     ax2.set_ylabel('YOUR LABEL HERE',color='b')
 
- 
+
     #Set the limits for the y-axis 
  
     #Only display the possible values for the stages
@@ -222,7 +229,7 @@ def plot_hypnogram(eeg, stages, srate):
         t1.set_color('b')
     
     #Title your plot    
-
+    plt.title('Hypnogram - Practice Data') 
 
         
 def classifier_tester(classifiedEEG, actualEEG):
@@ -296,16 +303,34 @@ if __name__ == "__main__":
     plot_example_psds(examples,srate)
     #Plot the spectrograms
     plot_example_spectrograms(examples,srate)
-    #Test the examples
    
-       
+   #Test the examples   
+    for j in range(0, len(examples)):
+        print('')
+        print('Testing Example : '+rowname[j])
+        print('')
+        for i in range(0, 10):
+            start = i * 3840
+            end = ((i + 1) * 3840)
+            epoch = examples[j][start:end]
+            print('Predicted NREM Stage = ' + str(classify_epoch(epoch,srate)))
    
-    #Load the practice data
-    #Load the practice answers
-    #Classify the practice data
-    #Check your performance
+    # supplied tester
+    test_examples(examples, srate)
     
+    #Load the practice data
+    eeg, srate = load_eeg('practice_eeg.npz')   
+    #Load the practice answers
+    stages = load_stages('practice_answers.npz')
+    
+    #Classify the practice data
+    classifiedEEG = classify_eeg(eeg,srate)  
+    
+    #Check your performance
+    actualEEG = stages
+    classifier_tester(classifiedEEG, actualEEG)
+ 
     #Generate the hypnogram plots
 
-
+    plot_hypnogram(eeg, stages, srate)
 
