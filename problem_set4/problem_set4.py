@@ -140,7 +140,7 @@ def classify_epoch(epoch,rate):
     ## Better Classifier - Cummulative Power Distribution
     ## find where cummulative power exceeds threshold %
     threshold = 0.966
-    print('Cumulative Power - Threshold set to ' + str(threshold*100)+'%')
+    #print('Cumulative Power - Threshold set to ' + str(threshold*100)+'%')
    
     # iterate over each example data set
     Pxx, freqs = m.psd(epoch, NFFT=512, Fs=rate)
@@ -156,7 +156,7 @@ def classify_epoch(epoch,rate):
         j = j + 1    
  
     # stop when cummulative power exceeds threshold %
-    print('Threshold Met at Frequency = '+str(freqs[j])+' Hz')
+    #print('Threshold Met at Frequency = '+str(freqs[j])+' Hz')
     threshFreq = freqs[j]
     
 #    RESULTS CALCULATED FROM EXAMPLES[]
@@ -212,14 +212,15 @@ def plot_hypnogram(eeg, stages, srate):
     #Use ax2.plot to draw the hypnogram.  Be sure your x values are in seconds
     #HINT: Use drawstyle='steps' to allow step functions in your plot
     
-    times = np.arange(0,len(classifiedEEG)*30, 30, drawstyle='steps')   
-    ax2.plot(times, stages)
+    times = np.arange(0,len(stages)*30, 30)   
+    ax2.plot(times, stages, drawstyle='steps')
     
     #Label your right y-axis and change the text color to match your plot
-    ax2.set_ylabel('YOUR LABEL HERE',color='b')
+    ax2.set_ylabel('NREM Stage',color='b')
 
 
     #Set the limits for the y-axis 
+    plt.ylim(0.5,3.5)
  
     #Only display the possible values for the stages
     ax2.set_yticks(np.arange(1,4))
@@ -331,6 +332,17 @@ if __name__ == "__main__":
     classifier_tester(classifiedEEG, actualEEG)
  
     #Generate the hypnogram plots
+    #plot_hypnogram(eeg, stages, srate)
+    plot_hypnogram(eeg, classifiedEEG, srate)
+    
+    #Run classifier on another data set "test_eeg" and plot
+    print('')
+    print('Loading "test_eeg" data set')
+    eeg2, srate2 = load_eeg('test_eeg.npz')   
+    print('Analyzing "test_eeg" data set')
+    classifiedEEG2 = classify_eeg(eeg2,srate2)
+    print('Plotting "test_eeg" data set')
+    plot_hypnogram(eeg2, classifiedEEG2, srate2)
+    plt.title('Hypnogram - Test Data')  # override title
 
-    plot_hypnogram(eeg, stages, srate)
 
