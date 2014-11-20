@@ -142,7 +142,7 @@ def classify_epoch(epoch,rate):
     # for Stage 3/4
     # Most of power contained in a small low freq range   
    
-    fLoPowerCutoff = 6       # low frequency cutoff for Stage 3/4   
+    fLoPowerCutoff = 9     # low frequency cutoff for Stage 3/4   
     loPowerPercent = 0.966  # % of total power in below cutoff
   
     # Adjust to tune classifier
@@ -150,7 +150,7 @@ def classify_epoch(epoch,rate):
     # look for "sleep spindles" in a band for 11-15 Hz  
     fLoBand = 11             # freq to tune band for Stage 2
     fHiBand = 15             # freq to tune band for Stage 2
-    bandPowerPercent = 0.04  # threshold criteria for power in band
+    bandPowerPercent = 0.021  # threshold criteria for power in band
 
   
   
