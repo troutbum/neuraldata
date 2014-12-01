@@ -16,7 +16,7 @@ CFILES = np.array([['S1_BSL.npz', 'S1_REC.npz'],
                    ['S3_BSL.npz', 'S3_REC.npz'],
                    ['S4_BSL.npz', 'S4_REC.npz']])
 
-CDIR = '/Users/Gene/Development/SleepEEGData/'
+CDIR = '/Users/Troutbum/Development/SleepEEGData/'
 
 def load_eeg(filename, dirname=CDIR):
     """

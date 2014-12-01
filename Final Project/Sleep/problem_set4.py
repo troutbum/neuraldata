@@ -245,7 +245,7 @@ def plot_hypnogram(eeg, stages, srate):
     #HINT: Use drawstyle='steps' to allow step functions in your plot
     
     times = np.arange(0,len(stages)*30, 30)   
-    ax2.plot(times, stages, drawstyle='steps')
+    ax2.plot(times, stages, drawstyle='steps', color='red')
     
     #Label your right y-axis and change the text color to match your plot
     ax2.set_ylabel('NREM Stage',color='b')
