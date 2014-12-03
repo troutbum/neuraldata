@@ -14,14 +14,10 @@ from copy import deepcopy
 from datetime import timedelta
 from IPython.html.widgets import interactive
 from IPython.display import Audio, display
-
-rowname = ['REM sleep', 'Stage 1 NREM sleep', 
-             'Stage 2 NREM sleep', 'Stage 3 and 4 NREM sleep'];
-             
-#rowname = ['EEG Ch1', 'EEG Ch2', 'EEG Ch8','EEG Ch9',
-#           'EOG Ch3', 'EOG Ch4',
-#           'EMG Ch5', 'EMG Ch6', 'EMG Ch7'];
-            
+           
+rowname = ['EEG Ch1', 'EEG Ch2', 'EEG Ch8','EEG Ch9',
+           'EOG Ch3', 'EOG Ch4',
+           'EMG Ch5', 'EMG Ch6', 'EMG Ch7'];            
 
 CFILES = np.array([['S1_BSL.npz', 'S1_REC.npz'],
                    ['S2_BSL.npz', 'S2_REC.npz'],
@@ -66,24 +62,42 @@ def load_sleepdata(filename, dirname=CDIR):
         6 - Movement Time    
         7 - Unscored
     """
+    gc.collect()
     data = np.load(dirname + filename)
     return data['DATA'], int(data['srate']), data['stages']
 
-def compare_stages_hist():
+def plot_hist_stages_base_vs_recovery(base_stages, rec_stages, subject):
     """
     histogram comparing sleep stage distribution 
     of baseline versus recovery subject states
-    """
-    for subject in range(0,2) : 
-        plt.figure()
-        base_data, srate, base_stages = load_sleepdata(CFILES[subject][0])
-        rec_data, srate, rec_stages = load_sleepdata(CFILES[subject][1])
-        p.hist( [base_stages, rec_stages], histtype='bar', normed=True,
-               label=['Baseline', 'Recovery'])
-        plt.title('Sleep Stages (Test Subject '+str(subject+1)+')')
-        plt.xlabel('Observed Sleep Stage')
-        plt.ylabel('Normalized Time')
-        plt.legend()
+    """  
+    plt.figure()
+    p.hist( [base_stages, rec_stages], histtype='bar', normed=True,
+           label=['Baseline', 'Recovery'])
+    plt.title('Time Spent in Sleep Stages (Test Subject '+str(subject)+')')
+    plt.xlabel('Observed Sleep Stage')
+    plt.ylabel('Normalized Time')
+    plt.legend()
+    mString1 ='0 - Awake\n1 - NREM Stage 1\n2 - NREM Stage 2'
+    mString2 = '\n3 - NREM Stage 3\n4 - NREM Stage 4\n5 - REM Sleep'
+    mString3 = '\n6 - Movement Time\n7 - Unscored'
+    mString = mString1 + mString2 + mString3
+    plt.annotate(mString, xy=(0.75, 0.45), xycoords='axes fraction')
+    return
+     
+def plot_stage_vs_time(base_stages, rec_stages):
+    plt.figure()
+      
+#    plt.plot(base_stages)
+#    plt.subplot(rec_stages) 
+    #x = np.arange(0,len(rec_stages))   
+   
+    ax2 = plt.subplot(212) # creates second axis
+    ax2.plot(rec_stages, 'green')
+    ax1 = plt.subplot(211, sharex=ax2) # creates first axis
+    ax1.plot(base_stages, color='blue')
+    
+    plt.show()
      
 def verify_datasets():
     """
@@ -128,8 +142,15 @@ if __name__ == "__main__":
     
     plt.close('all') #Closes old plots.   
     #    verify_datasets()  # checks # of stages vs calculated epochs
-  
-    compare_stages_hist()
+    
+    data_sub1bas, srate, stages_sub1bas = load_sleepdata(CFILES[0][0])
+    data_sub1rec, srate, stages_sub1rec = load_sleepdata(CFILES[0][1]) 
+    data_sub2bas, srate, stages_sub2bas = load_sleepdata(CFILES[0][0])
+    data_sub2rec, srate, stages_sub2rec = load_sleepdata(CFILES[0][1]) 
+ 
+    plot_hist_stages_base_vs_recovery(stages_sub1bas, stages_sub1rec, 1)
+    plot_hist_stages_base_vs_recovery(stages_sub2bas, stages_sub2rec, 2)
+    plot_stage_vs_time(stages_sub1bas, stages_sub1rec)
   
 #    v = interactive(beat_freq, f1=(200.0,300.0), f2=(200.0,300.0))
 #    display(v)
