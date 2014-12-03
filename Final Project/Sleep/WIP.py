@@ -73,7 +73,7 @@ def plot_hist_stages_base_vs_recovery(base_stages, rec_stages, subject):
     """  
     plt.figure()
     p.hist( [base_stages, rec_stages], histtype='bar', normed=True,
-           label=['Baseline', 'Recovery'])
+           label=['Baseline', 'Recovery'], color=['black','red'])
     plt.title('Time Spent in Sleep Stages (Test Subject '+str(subject)+')')
     plt.xlabel('Observed Sleep Stage')
     plt.ylabel('Normalized Time')
@@ -85,19 +85,38 @@ def plot_hist_stages_base_vs_recovery(base_stages, rec_stages, subject):
     plt.annotate(mString, xy=(0.75, 0.45), xycoords='axes fraction')
     return
      
-def plot_stage_vs_time(base_stages, rec_stages):
+def plot_stage_vs_time(stages_sub1bsl, stages_sub1rec, 
+                       stages_sub2bsl, stages_sub2rec):
     plt.figure()
-      
-#    plt.plot(base_stages)
-#    plt.subplot(rec_stages) 
-    #x = np.arange(0,len(rec_stages))   
-   
-    ax2 = plt.subplot(212) # creates second axis
-    ax2.plot(rec_stages, 'green')
-    ax1 = plt.subplot(211, sharex=ax2) # creates first axis
-    ax1.plot(base_stages, color='blue')
+#    ax = plt.subplot(111)    # The big subplot
+    
+    ax4 = plt.subplot(414) # creates second axis
+    ax4.plot(stages_sub2rec, 'red')
+    ax4.set_xlim([0, len(stages_sub2rec)])
+    
+    ax1 = plt.subplot(411, sharex=ax4) # creates first axis
+    ax1.plot(stages_sub1bsl, color='black')
+    
+    ax2 = plt.subplot(412, sharex=ax4) # creates second axis
+    ax2.plot(stages_sub1rec, 'red')
+ 
+    ax3 = plt.subplot(413, sharex=ax4) # creates first axis
+    ax3.plot(stages_sub2bsl, color='black')
+
+    ax1.set_title('Subject 1 Baseline')
+    ax2.set_title('Subject 1 Recovery')    
+    ax3.set_title('Subject 2 Baseline')
+    ax4.set_title('Subject 2 Recovery')
+    
+#    ax.set_ylabel('Observed Sleep Stage')  # common ylabel
+#    ax.set_xlabel('Epoch Number')
+
+    # Set common labels
+    plt.text(0.5, 0.5, 'common xlabel', ha='center', va='center')
+    plt.text(0.5, 0.5, 'common ylabel', ha='center', va='center', rotation='vertical')
     
     plt.show()
+    
      
 def verify_datasets():
     """
@@ -143,14 +162,15 @@ if __name__ == "__main__":
     plt.close('all') #Closes old plots.   
     #    verify_datasets()  # checks # of stages vs calculated epochs
     
-    data_sub1bas, srate, stages_sub1bas = load_sleepdata(CFILES[0][0])
+    data_sub1bsl, srate, stages_sub1bsl = load_sleepdata(CFILES[0][0])
     data_sub1rec, srate, stages_sub1rec = load_sleepdata(CFILES[0][1]) 
-    data_sub2bas, srate, stages_sub2bas = load_sleepdata(CFILES[0][0])
-    data_sub2rec, srate, stages_sub2rec = load_sleepdata(CFILES[0][1]) 
+    data_sub2bsl, srate, stages_sub2bsl = load_sleepdata(CFILES[1][0])
+    data_sub2rec, srate, stages_sub2rec = load_sleepdata(CFILES[1][1]) 
  
-    plot_hist_stages_base_vs_recovery(stages_sub1bas, stages_sub1rec, 1)
-    plot_hist_stages_base_vs_recovery(stages_sub2bas, stages_sub2rec, 2)
-    plot_stage_vs_time(stages_sub1bas, stages_sub1rec)
+    plot_hist_stages_base_vs_recovery(stages_sub1bsl, stages_sub1rec, 1)
+    plot_hist_stages_base_vs_recovery(stages_sub2bsl, stages_sub2rec, 2)
+    plot_stage_vs_time(stages_sub1bsl, stages_sub1rec, 
+                       stages_sub2bsl, stages_sub2rec)
   
 #    v = interactive(beat_freq, f1=(200.0,300.0), f2=(200.0,300.0))
 #    display(v)
