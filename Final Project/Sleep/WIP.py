@@ -15,7 +15,7 @@ from datetime import timedelta
 from IPython.html.widgets import interactive
 from IPython.display import Audio, display
            
-rowname = ['EEG Ch1', 'EEG Ch2', 'EEG Ch8','EEG Ch9',
+channel_name = ['EEG Ch1', 'EEG Ch2', 'EEG Ch8','EEG Ch9',
            'EOG Ch3', 'EOG Ch4',
            'EMG Ch5', 'EMG Ch6', 'EMG Ch7'];            
 
@@ -66,6 +66,49 @@ def load_sleepdata(filename, dirname=CDIR):
     data = np.load(dirname + filename)
     return data['DATA'], int(data['srate']), data['stages']
 
+def plot_psds(data, rate, subject, condition):
+    """
+    Plots the frequency response for all 9 channels
+    using the entire recording    
+    """
+    fig = plt.figure() 
+   
+   
+    # common xlabel
+    fig.text(0.5, 0.975,'Frequency Response for Complete Recording - '+ 
+            'Subject #'+subject+' '+condition+' Dataset',
+             ha='center', va='center')
+    # common ylabel
+    fig.text(0.06, 0.5, 'Normalized Power Spectral Density', 
+             ha='center', va='center', rotation='vertical')
+
+
+    # use this to stack EEG, EOG, EMG on top of each other
+    sub_order = [1,4,7,10,2,5,3,6,9]    
+
+    for ch in range(0, len(data)):
+        plt.subplot(4, 3, sub_order[ch])
+        plt.subplots_adjust(hspace=.5)  # adds space between subplots
+        
+        Pxx, freqs = m.psd(data[ch], NFFT=512, Fs=rate)
+        normalizedPxx = Pxx/sum(Pxx)
+        plt.plot(freqs, normalizedPxx, label=channel_name[ch])
+        
+        plt.title(channel_name[ch]) 
+        plt.xlabel('Frequency (Hz)')
+        #plt.ylabel('Normalized Power Spectral Density')        
+      
+        ## Inserted into plotting loop
+        ## Possible Classifier - calculate average power-weighted frequency    
+        sumPower = 0
+        for j in range(0, len(normalizedPxx)):
+            sumPower = sumPower + (normalizedPxx[j] * freqs[j])
+    
+        avgFreq = sumPower/len(freqs)
+        print(channel_name[ch] + " average frequency = " + str(avgFreq))
+         
+    
+
 def plot_hist_stages_base_vs_recovery(base_stages, rec_stages, subject):
     """
     histogram comparing sleep stage distribution 
@@ -74,7 +117,8 @@ def plot_hist_stages_base_vs_recovery(base_stages, rec_stages, subject):
     plt.figure()
     p.hist( [base_stages, rec_stages], histtype='bar', normed=True,
            label=['Baseline', 'Recovery'], color=['black','red'])
-    plt.title('Time Spent in Sleep Stages (Test Subject '+str(subject)+')')
+    plt.title('Proportion of Time Spent in Sleep Stages (Test Subject '
+            +str(subject)+')')
     plt.xlabel('Observed Sleep Stage')
     plt.ylabel('Normalized Time')
     plt.legend()
@@ -162,15 +206,24 @@ if __name__ == "__main__":
     plt.close('all') #Closes old plots.   
     #    verify_datasets()  # checks # of stages vs calculated epochs
     
+    # load datasets for Subject 1 & 2 (baseline & recovery)
     data_sub1bsl, srate, stages_sub1bsl = load_sleepdata(CFILES[0][0])
     data_sub1rec, srate, stages_sub1rec = load_sleepdata(CFILES[0][1]) 
     data_sub2bsl, srate, stages_sub2bsl = load_sleepdata(CFILES[1][0])
     data_sub2rec, srate, stages_sub2rec = load_sleepdata(CFILES[1][1]) 
  
+    # plot histogram of sleep stage states
     plot_hist_stages_base_vs_recovery(stages_sub1bsl, stages_sub1rec, 1)
     plot_hist_stages_base_vs_recovery(stages_sub2bsl, stages_sub2rec, 2)
+    
+    # plot time series of sleep stage states
     plot_stage_vs_time(stages_sub1bsl, stages_sub1rec, 
                        stages_sub2bsl, stages_sub2rec)
+  
+    plot_psds(data_sub1bsl, srate, '1', 'Baseline')
+    plot_psds(data_sub1rec, srate, '1', 'Recovery')
+    plot_psds(data_sub2bsl, srate, '2', 'Baseline')
+    plot_psds(data_sub2rec, srate, '2', 'Recovery')
   
 #    v = interactive(beat_freq, f1=(200.0,300.0), f2=(200.0,300.0))
 #    display(v)
@@ -187,7 +240,7 @@ if __name__ == "__main__":
 #   #Test the examples   
 #    for j in range(0, len(examples)):
 #        print('')
-#        print('Testing Example : '+rowname[j])
+#        print('Testing Example : '+channel[j])
 #        print('')
 #        for i in range(0, 10):
 #            start = i * 3840
