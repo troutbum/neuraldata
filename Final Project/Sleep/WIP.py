@@ -24,8 +24,8 @@ CFILES = np.array([['S1_BSL.npz', 'S1_REC.npz'],
                    ['S3_BSL.npz', 'S3_REC.npz'],
                    ['S4_BSL.npz', 'S4_REC.npz']])
 
-#CDIR = '/Users/Troutbum/Development/SleepEEGData/'
-CDIR = '/Users/Gene/Development/SleepEEGData/'
+CDIR = '/Users/Troutbum/Development/SleepEEGData/'
+#CDIR = '/Users/Gene/Development/SleepEEGData/'
 
 def load_sleepdata(filename, dirname=CDIR):
     """
@@ -74,12 +74,19 @@ def plot_psds(data, rate, subject, condition):
     fig = plt.figure() 
    
     # common xlabel
-    fig.text(0.5, 0.975,'Frequency Response for Complete Recording - '+ 
-            'Subject #'+subject+' '+condition+' Dataset',
-             ha='center', va='center')
+#    fig.text(0.5, 0.975,'Frequency Response for Complete Recording - '+ 
+#            'Subject #'+subject+' '+condition+' Dataset',
+#             ha='center', va='center', fontsize=14, fontweight='bold')
+   
+   # common title
+    fig.suptitle('Frequency Response for Complete Recording - '+ 
+            'Subject #'+subject+' '+condition+' Dataset', 
+            fontsize=14, fontweight='bold')
+             
     # common ylabel
     fig.text(0.06, 0.5, 'Normalized Power Spectral Density', 
-             ha='center', va='center', rotation='vertical')
+             ha='center', va='center', rotation='vertical',
+             fontsize=14, fontweight='bold')
 
 
     # use this to stack EEG, EOG, EMG on top of each other
@@ -113,6 +120,7 @@ def plot_hist_stages_base_vs_recovery(base_stages, rec_stages, subject):
     histogram comparing sleep stage distribution 
     of baseline versus recovery subject states
     """  
+
     plt.figure()
     p.hist( [base_stages, rec_stages], histtype='bar', normed=True,
            label=['Baseline', 'Recovery'], color=['black','red'])
@@ -130,7 +138,26 @@ def plot_hist_stages_base_vs_recovery(base_stages, rec_stages, subject):
      
 def plot_stage_vs_time(stages_sub1bsl, stages_sub1rec, 
                        stages_sub2bsl, stages_sub2rec):
-    plt.figure()
+    """
+    time series plot of sleep stage
+    baseline versus recovery subject states
+    """  
+                      
+    fig = plt.figure()
+    
+    # common title
+    fig.suptitle('Observed Sleep Stages vs Time', fontsize=14, 
+                 fontweight='bold')
+       
+    # common xlabel
+    fig.text(0.5, 0.05,'Epoch (30 second intervals)',
+             ha='center', va='center',fontsize=14, fontweight='bold')
+    # common ylabel
+    fig.text(0.06, 0.5, 'Sleep Stage', 
+             ha='center', va='center', rotation='vertical',
+             fontsize=14, fontweight='bold')                      
+                                                
+#    plt.figure()
 #    ax = plt.subplot(111)    # The big subplot
     
     ax4 = plt.subplot(414) # creates second axis
@@ -154,11 +181,11 @@ def plot_stage_vs_time(stages_sub1bsl, stages_sub1rec,
 #    ax.set_ylabel('Observed Sleep Stage')  # common ylabel
 #    ax.set_xlabel('Epoch Number')
 
-    # Set common labels
-    plt.text(0.5, 0.5, 'common xlabel', ha='center', va='center')
-    plt.text(0.5, 0.5, 'common ylabel', ha='center', va='center', rotation='vertical')
-    
-    plt.show()
+#    # Set common labels
+#    plt.text(0.5, 0.5, 'common xlabel', ha='center', va='center')
+#    plt.text(0.5, 0.5, 'common ylabel', ha='center', va='center', rotation='vertical')
+#    
+#    plt.show()
     
      
 def verify_datasets():
