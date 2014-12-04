@@ -66,34 +66,120 @@ def load_sleepdata(filename, dirname=CDIR):
     data = np.load(dirname + filename)
     return data['DATA'], int(data['srate']), data['stages']
 
+def plot_spectrograms(data, rate, subject, condition):
+    """
+    Creates spectrogram subplots for all 9 channels
+    """
+    fig = plt.figure()   
+   # common title
+    fig.suptitle('Spectrogram - '+ 
+            'Subject #'+subject+' '+condition+' Dataset', 
+            fontsize=14, fontweight='bold')            
+    # common ylabel
+    fig.text(0.06, 0.5, 'ylabel', 
+             ha='center', va='center', rotation='vertical',
+             fontsize=14, fontweight='bold')
+    # use this to stack EEG, EOG, EMG on top of each other         
+    sub_order = [1,4,7,10,2,5,3,6,9]          
+    
+    for ch in range(0, len(data)):
+        plt.subplot(4, 3, sub_order[ch])
+        plt.subplots_adjust(hspace=.6)  # adds space between subplots
+        plt.title(channel_name[ch])    
+        Pxx, freqs, bins, im = plt.specgram(data[ch],NFFT=512,Fs=rate)       
+        plt.ylim(0,70)
+        plt.xlabel('Time (Seconds)')
+        plt.ylabel('Frequency (Hz)')
+      
+    return
+    
+def plotall_hypnograms(dataset, stages, rate, subject, condition):
+    """
+    Creates a hypnogram subplot for all 9 channels
+    This function takes the eeg, the stages and sampling rate and draws a 
+    hypnogram over the spectrogram of the data.
+    """
+    #fig = plt.subplots()
+   # common title
+#    fig.suptitle('Spectrogram - '+ 
+#            'Subject #'+subject+' '+condition+' Dataset', 
+#            fontsize=14, fontweight='bold')            
+    # common ylabel
+#    fig.text(0.06, 0.5, 'ylabel', 
+#             ha='center', va='center', rotation='vertical',
+#             fontsize=14, fontweight='bold')
+    # use this to stack EEG, EOG, EMG on top of each other         
+    #sub_order = [1,4,7,10,2,5,3,6,9]          
+    
+    for ch in range(0, len(dataset)):
+        #plt.subplot(4, 3, sub_order[ch])
+        #plt.subplots_adjust(hspace=.6)  # adds space between subplots
+        #plt.title(channel_name[ch])    
+        #Pxx, freqs, bins, im = plt.specgram(data[ch],NFFT=512,Fs=rate)  
+        plot_hypnogram(dataset[ch], ch, stages, srate, subject, condition)
+        #plt.ylim(0,70)
+        #plt.xlabel('Time (Seconds)')
+        #plt.ylabel('Frequency (Hz)')
+      
+    return    
+    
+def plot_hypnogram(eeg, channel, stages, srate, subject, condition):
+    """
+    This function takes the eeg, the stages and sampling rate and draws a 
+    hypnogram over the spectrogram of the data.
+    """ 
+    fig,ax1 = plt.subplots()  #Needed for the multiple y-axes 
+    #Use the specgram function to draw the spectrogram as usual    
+    Pxx, freqs, bins, im = plt.specgram(eeg,NFFT=512,Fs=srate)            
+    #Label your x and y axes and set the y limits for the spectrogram
+    plt.ylim(0,30)
+    plt.xlabel('Time (Seconds)')
+    plt.ylabel('Frequency (Hz)')  
+    ax2 = ax1.twinx() #Necessary for multiple y-axes  
+    #Use ax2.plot to draw the hypnogram.  Be sure your x values are in seconds
+    #HINT: Use drawstyle='steps' to allow step functions in your plot 
+    times = np.arange(0,len(stages)*30, 30)   
+    ax2.plot(times, stages, drawstyle='steps', color='blue')   
+    #Label your right y-axis and change the text color to match your plot
+    ax2.set_ylabel('NREM Stage',color='b')
+    #Set the limits for the y-axis 
+    plt.ylim(0.0,7.0)
+    #Only display the possible values for the stages
+    ax2.set_yticks(np.arange(1,7))   
+    #Change the left axis tick color to match your plot
+    for t1 in ax2.get_yticklabels():
+        t1.set_color('b')    
+    #Title your plot    
+    plt.title('Hypnogram - '+ 'Subject #'+subject+' '+condition+' - '
+            +str(channel_name[channel]), 
+            fontsize=14, fontweight='bold')     
+    
+
 def plot_psds(data, rate, subject, condition):
     """
     Plots the frequency response for all 9 channels
     using the entire recording    
     """
-    fig = plt.figure() 
-   
-    # common xlabel
-#    fig.text(0.5, 0.975,'Frequency Response for Complete Recording - '+ 
-#            'Subject #'+subject+' '+condition+' Dataset',
-#             ha='center', va='center', fontsize=14, fontweight='bold')
-   
+    fig = plt.figure()   
    # common title
     fig.suptitle('Frequency Response for Complete Recording - '+ 
             'Subject #'+subject+' '+condition+' Dataset', 
-            fontsize=14, fontweight='bold')
-             
+            fontsize=14, fontweight='bold')            
     # common ylabel
     fig.text(0.06, 0.5, 'Normalized Power Spectral Density', 
              ha='center', va='center', rotation='vertical',
              fontsize=14, fontweight='bold')
+    # common xlabel
+    fig.text(0.5, 0.05,'Frequency (Hz)',
+             ha='center', va='center',fontsize=14, fontweight='bold')
 
 
     # use this to stack EEG, EOG, EMG on top of each other
     sub_order = [1,4,7,10,2,5,3,6,9]    
 
     for ch in range(0, len(data)):
-        plt.subplot(4, 3, sub_order[ch])
+        #plt.subplot(4, 3, sub_order[ch])  # 4 x 3 layout
+        plt.subplot(9, 1, ch + 1)  # vertical 9 x 1 layout
         plt.subplots_adjust(hspace=.6)  # adds space between subplots
         
         Pxx, freqs = m.psd(data[ch], NFFT=512, Fs=rate)
@@ -101,7 +187,7 @@ def plot_psds(data, rate, subject, condition):
         plt.plot(freqs, normalizedPxx, label=channel_name[ch])
         
         plt.title(channel_name[ch]) 
-        plt.xlabel('Frequency (Hz)')
+        #plt.xlabel('Frequency (Hz)')
         #plt.ylabel('Normalized Power Spectral Density')        
       
         ## Inserted into plotting loop
@@ -143,12 +229,10 @@ def plot_stage_vs_time(stages_sub1bsl, stages_sub1rec,
     baseline versus recovery subject states
     """  
                       
-    fig = plt.figure()
-    
+    fig = plt.figure()   
     # common title
     fig.suptitle('Observed Sleep Stages vs Time', fontsize=14, 
-                 fontweight='bold')
-       
+                 fontweight='bold')       
     # common xlabel
     fig.text(0.5, 0.05,'Epoch (30 second intervals)',
              ha='center', va='center',fontsize=14, fontweight='bold')
@@ -156,9 +240,6 @@ def plot_stage_vs_time(stages_sub1bsl, stages_sub1rec,
     fig.text(0.06, 0.5, 'Sleep Stage', 
              ha='center', va='center', rotation='vertical',
              fontsize=14, fontweight='bold')                      
-                                                
-#    plt.figure()
-#    ax = plt.subplot(111)    # The big subplot
     
     ax4 = plt.subplot(414) # creates second axis
     ax4.plot(stages_sub2rec, 'red')
@@ -177,16 +258,6 @@ def plot_stage_vs_time(stages_sub1bsl, stages_sub1rec,
     ax2.set_title('Subject 1 Recovery')    
     ax3.set_title('Subject 2 Baseline')
     ax4.set_title('Subject 2 Recovery')
-    
-#    ax.set_ylabel('Observed Sleep Stage')  # common ylabel
-#    ax.set_xlabel('Epoch Number')
-
-#    # Set common labels
-#    plt.text(0.5, 0.5, 'common xlabel', ha='center', va='center')
-#    plt.text(0.5, 0.5, 'common ylabel', ha='center', va='center', rotation='vertical')
-#    
-#    plt.show()
-    
      
 def verify_datasets():
     """
@@ -246,10 +317,23 @@ if __name__ == "__main__":
     plot_stage_vs_time(stages_sub1bsl, stages_sub1rec, 
                        stages_sub2bsl, stages_sub2rec)
   
+    # plot frequency response of complete datasets  
     plot_psds(data_sub1bsl, srate, '1', 'Baseline')
     plot_psds(data_sub1rec, srate, '1', 'Recovery')
     plot_psds(data_sub2bsl, srate, '2', 'Baseline')
     plot_psds(data_sub2rec, srate, '2', 'Recovery')
+  
+    # plot spectrograms of datasets  
+    plot_spectrograms(data_sub1bsl, srate, '1', 'Baseline')  
+    
+    # plot one hypnogram (spectrogram and sleep stage)
+    plot_hypnogram(data_sub1bsl[0], 0, stages_sub1bsl, srate, '1', 'Baseline' )
+  
+    # plot all hypnograms for all 9 channels in dataset 
+    plotall_hypnograms(data_sub1bsl, stages_sub1bsl, srate, '1', 'Baseline')
+    plotall_hypnograms(data_sub1rec, stages_sub1rec, srate, '1', 'Recovery')
+    plotall_hypnograms(data_sub2bsl, stages_sub2bsl, srate, '2', 'Baseline')
+    plotall_hypnograms(data_sub2rec, stages_sub2rec, srate, '2', 'Recovery')
   
 #    v = interactive(beat_freq, f1=(200.0,300.0), f2=(200.0,300.0))
 #    display(v)
