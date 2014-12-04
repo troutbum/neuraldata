@@ -24,8 +24,8 @@ CFILES = np.array([['S1_BSL.npz', 'S1_REC.npz'],
                    ['S3_BSL.npz', 'S3_REC.npz'],
                    ['S4_BSL.npz', 'S4_REC.npz']])
 
-CDIR = '/Users/Troutbum/Development/SleepEEGData/'
-#CDIR = '/Users/Gene/Development/SleepEEGData/'
+#CDIR = '/Users/Troutbum/Development/SleepEEGData/'
+CDIR = '/Users/Gene/Development/SleepEEGData/'
 
 def load_sleepdata(filename, dirname=CDIR):
     """
@@ -73,7 +73,6 @@ def plot_psds(data, rate, subject, condition):
     """
     fig = plt.figure() 
    
-   
     # common xlabel
     fig.text(0.5, 0.975,'Frequency Response for Complete Recording - '+ 
             'Subject #'+subject+' '+condition+' Dataset',
@@ -88,7 +87,7 @@ def plot_psds(data, rate, subject, condition):
 
     for ch in range(0, len(data)):
         plt.subplot(4, 3, sub_order[ch])
-        plt.subplots_adjust(hspace=.5)  # adds space between subplots
+        plt.subplots_adjust(hspace=.6)  # adds space between subplots
         
         Pxx, freqs = m.psd(data[ch], NFFT=512, Fs=rate)
         normalizedPxx = Pxx/sum(Pxx)
