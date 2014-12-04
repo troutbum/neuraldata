@@ -99,28 +99,9 @@ def plotall_hypnograms(dataset, stages, rate, subject, condition):
     This function takes the eeg, the stages and sampling rate and draws a 
     hypnogram over the spectrogram of the data.
     """
-    #fig = plt.subplots()
-   # common title
-#    fig.suptitle('Spectrogram - '+ 
-#            'Subject #'+subject+' '+condition+' Dataset', 
-#            fontsize=14, fontweight='bold')            
-    # common ylabel
-#    fig.text(0.06, 0.5, 'ylabel', 
-#             ha='center', va='center', rotation='vertical',
-#             fontsize=14, fontweight='bold')
-    # use this to stack EEG, EOG, EMG on top of each other         
-    #sub_order = [1,4,7,10,2,5,3,6,9]          
-    
     for ch in range(0, len(dataset)):
-        #plt.subplot(4, 3, sub_order[ch])
-        #plt.subplots_adjust(hspace=.6)  # adds space between subplots
-        #plt.title(channel_name[ch])    
-        #Pxx, freqs, bins, im = plt.specgram(data[ch],NFFT=512,Fs=rate)  
         plot_hypnogram(dataset[ch], ch, stages, srate, subject, condition)
-        #plt.ylim(0,70)
-        #plt.xlabel('Time (Seconds)')
-        #plt.ylabel('Frequency (Hz)')
-      
+ 
     return    
     
 def plot_hypnogram(eeg, channel, stages, srate, subject, condition):
@@ -149,11 +130,14 @@ def plot_hypnogram(eeg, channel, stages, srate, subject, condition):
     #Change the left axis tick color to match your plot
     for t1 in ax2.get_yticklabels():
         t1.set_color('b')    
-    #Title your plot    
-    plt.title('Hypnogram - '+ 'Subject #'+subject+' '+condition+' - '
-            +str(channel_name[channel]), 
-            fontsize=14, fontweight='bold')     
-    
+    #Title your plot  
+    fname = ('Hypnogram - '+ 'Subject #'
+        +subject+' '+condition+' - '+str(channel_name[channel]))
+    plt.title(fname, fontsize=14, fontweight='bold')
+#    plt.title('Hypnogram - '+ 'Subject #'+subject+' '+condition+' - '
+#            +str(channel_name[channel]), 
+#            fontsize=14, fontweight='bold')        
+    fig.savefig(fname+'.png', format='png')        
 
 def plot_psds(data, rate, subject, condition):
     """
@@ -327,7 +311,7 @@ if __name__ == "__main__":
     plot_spectrograms(data_sub1bsl, srate, '1', 'Baseline')  
     
     # plot one hypnogram (spectrogram and sleep stage)
-    plot_hypnogram(data_sub1bsl[0], 0, stages_sub1bsl, srate, '1', 'Baseline' )
+    #plot_hypnogram(data_sub1bsl[0], 0, stages_sub1bsl, srate, '1', 'Baseline' )
   
     # plot all hypnograms for all 9 channels in dataset 
     plotall_hypnograms(data_sub1bsl, stages_sub1bsl, srate, '1', 'Baseline')
