@@ -7,6 +7,7 @@ Created on Tue Dec  2 08:06:48 2014
 
 import gc
 import numpy as np
+import pandas as pd
 import matplotlib.pylab as plt
 import matplotlib.pyplot as p
 import matplotlib.mlab as m
@@ -24,8 +25,8 @@ CFILES = np.array([['S1_BSL.npz', 'S1_REC.npz'],
                    ['S3_BSL.npz', 'S3_REC.npz'],
                    ['S4_BSL.npz', 'S4_REC.npz']])
 
-CDIR = '/Users/Troutbum/Development/SleepEEGData/'
-#CDIR = '/Users/Gene/Development/SleepEEGData/'
+#CDIR = '/Users/Troutbum/Development/SleepEEGData/'
+CDIR = '/Users/Gene/Development/SleepEEGData/'
 
 def load_sleepdata(filename, dirname=CDIR):
     """
@@ -66,15 +67,26 @@ def load_sleepdata(filename, dirname=CDIR):
     data = np.load(dirname + filename)
     return data['DATA'], int(data['srate']), data['stages']
 
+def convert_to_df(data, stages):
+    # expand stage observations from         
+    xstage = np.zeros(len(data))        
+    index = 0
+    for epoch in range(0, len(stages)):
+        for j in range(0,30):            
+            xstage[index] = stages[epoch]
+            index = index + 1           
+    print len(xstage)  
+    df = pd.DataFrame({'edata' : data, 'stage' : xstage})     
+    return df
+
 def plot_spectrograms(data, rate, subject, condition):
     """
     Creates spectrogram subplots for all 9 channels
     """
     fig = plt.figure()   
    # common title
-    fig.suptitle('Spectrogram - '+ 
-            'Subject #'+subject+' '+condition+' Dataset', 
-            fontsize=14, fontweight='bold')            
+    fname = 'Spectrogram - '+'Subject #'+subject+' '+condition+' Dataset'
+    fig.suptitle(fname, fontsize=14, fontweight='bold')            
     # common ylabel
     fig.text(0.06, 0.5, 'ylabel', 
              ha='center', va='center', rotation='vertical',
@@ -90,7 +102,8 @@ def plot_spectrograms(data, rate, subject, condition):
         plt.ylim(0,70)
         plt.xlabel('Time (Seconds)')
         plt.ylabel('Frequency (Hz)')
-      
+    
+    #fig.savefig(fname+'.pdf', format='pdf')  buggy resolution problem
     return
     
 def plotall_hypnograms(dataset, stages, rate, subject, condition):
@@ -138,6 +151,7 @@ def plot_hypnogram(eeg, channel, stages, srate, subject, condition):
 #            +str(channel_name[channel]), 
 #            fontsize=14, fontweight='bold')        
     fig.savefig(fname+'.png', format='png')        
+    return
 
 def plot_psds(data, rate, subject, condition):
     """
@@ -182,7 +196,7 @@ def plot_psds(data, rate, subject, condition):
     
         avgFreq = sumPower/len(freqs)
         print(channel_name[ch] + " average frequency = " + str(avgFreq))
-         
+    return     
     
 
 def plot_hist_stages_base_vs_recovery(base_stages, rec_stages, subject):
@@ -242,7 +256,8 @@ def plot_stage_vs_time(stages_sub1bsl, stages_sub1rec,
     ax2.set_title('Subject 1 Recovery')    
     ax3.set_title('Subject 2 Baseline')
     ax4.set_title('Subject 2 Recovery')
-     
+    return    
+    
 def verify_datasets():
     """
     checks numbers of stages in file vs calculated epochs
@@ -257,6 +272,7 @@ def verify_datasets():
             print 'Stages in file = ' + str(len(stages)) 
             print 'Calculated number of epochs = ' + str(epochs) 
             print '  '
+    return        
     """"
     Discovered inconsistencies in datasets for Subject 3 & 4
     -->> number of stages in files does not match length of recording
@@ -294,18 +310,22 @@ if __name__ == "__main__":
     data_sub2rec, srate, stages_sub2rec = load_sleepdata(CFILES[1][1]) 
  
     # plot histogram of sleep stage states
+    """
     plot_hist_stages_base_vs_recovery(stages_sub1bsl, stages_sub1rec, 1)
     plot_hist_stages_base_vs_recovery(stages_sub2bsl, stages_sub2rec, 2)
+    """    
     
     # plot time series of sleep stage states
     plot_stage_vs_time(stages_sub1bsl, stages_sub1rec, 
                        stages_sub2bsl, stages_sub2rec)
   
     # plot frequency response of complete datasets  
+    """    
     plot_psds(data_sub1bsl, srate, '1', 'Baseline')
     plot_psds(data_sub1rec, srate, '1', 'Recovery')
     plot_psds(data_sub2bsl, srate, '2', 'Baseline')
     plot_psds(data_sub2rec, srate, '2', 'Recovery')
+    """
   
     # plot spectrograms of datasets  
     plot_spectrograms(data_sub1bsl, srate, '1', 'Baseline')  
@@ -314,59 +334,16 @@ if __name__ == "__main__":
     #plot_hypnogram(data_sub1bsl[0], 0, stages_sub1bsl, srate, '1', 'Baseline' )
   
     # plot all hypnograms for all 9 channels in dataset 
+    """      
     plotall_hypnograms(data_sub1bsl, stages_sub1bsl, srate, '1', 'Baseline')
     plotall_hypnograms(data_sub1rec, stages_sub1rec, srate, '1', 'Recovery')
     plotall_hypnograms(data_sub2bsl, stages_sub2bsl, srate, '2', 'Baseline')
     plotall_hypnograms(data_sub2rec, stages_sub2rec, srate, '2', 'Recovery')
-  
+     """
 #    v = interactive(beat_freq, f1=(200.0,300.0), f2=(200.0,300.0))
 #    display(v)
-
+  
+    # df = pd.DataFrame({'edata' : data_sub1bsl[0], 'stage' : stages_sub1bsl})
+      
     
-#    ##PART 1
-#    #Load the example data
-#    examples, srate = load_examples('example_stages.npz')
-#    #Plot the psds
-#    plot_example_psds(examples,srate)
-#    #Plot the spectrograms
-#    plot_example_spectrograms(examples,srate)
-#   
-#   #Test the examples   
-#    for j in range(0, len(examples)):
-#        print('')
-#        print('Testing Example : '+channel[j])
-#        print('')
-#        for i in range(0, 10):
-#            start = i * 3840
-#            end = ((i + 1) * 3840)
-#            epoch = examples[j][start:end]
-#            print('Predicted NREM Stage = ' + str(classify_epoch(epoch,srate)))
-#   
-#    # supplied tester
-#    test_examples(examples, srate)
-#    
-#    #Load the practice data
-#    eeg, srate = load_eeg('practice_eeg.npz')   
-#    #Load the practice answers
-#    stages = load_stages('practice_answers.npz')
-#    
-#    #Classify the practice data
-#    classifiedEEG = classify_eeg(eeg,srate)  
-#    
-#    #Check your performance
-#    actualEEG = stages
-#    classifier_tester(classifiedEEG, actualEEG)
-# 
-#    #Generate the hypnogram plots
-#    #plot_hypnogram(eeg, stages, srate)
-#    plot_hypnogram(eeg, classifiedEEG, srate)
-#    
-#    #Run classifier on another data set "test_eeg" and plot
-#    print('')
-#    print('Loading "test_eeg" data set')
-#    eeg2, srate2 = load_eeg('test_eeg.npz')   
-#    print('Analyzing "test_eeg" data set')
-#    classifiedEEG2 = classify_eeg(eeg2,srate2)
-#    print('Plotting "test_eeg" data set')
-#    plot_hypnogram(eeg2, classifiedEEG2, srate2)
-#    plt.title('Hypnogram - Test Data')  # override title    
+    fooDf = convert_to_df(data_sub1bsl[0], stages_sub1bsl)
