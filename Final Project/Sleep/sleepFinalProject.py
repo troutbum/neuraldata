@@ -28,8 +28,8 @@ CFILES = np.array([['S1_BSL.npz', 'S1_REC.npz'],
                    ['S3_BSL.npz', 'S3_REC.npz'],
                    ['S4_BSL.npz', 'S4_REC.npz']])
 
-CDIR = '/Users/Troutbum/Development/SleepEEGData/'
-#CDIR = '/Users/Gene/Development/SleepEEGData/'
+#CDIR = '/Users/Troutbum/Development/SleepEEGData/'
+CDIR = '/Users/Gene/Development/SleepEEGData/'
 
 def load_sleepdata(filename, dirname=CDIR):
     """
@@ -87,7 +87,7 @@ def sort_by_stage(data, stages):
 
     # create list
     sdata= []
-    for i in range(0,7):
+    for i in range(0,6):
         sdata.append(df.ix[df.stage==i]['edata'])     
     """    
     Pandas dataframe slicing techniques:
@@ -171,7 +171,7 @@ def plot_hypnogram(eeg, channel, stages, srate, subject, condition):
     fig.savefig(fname+'.png', format='png')        
     return
 
-def plot_psds(data, rate, subject, condition):
+def plot_psds(data, rate, subject, condition, label_set):
     """
     Plots the frequency response for all 9 channels
     using the entire recording    
@@ -188,11 +188,7 @@ def plot_psds(data, rate, subject, condition):
     # common xlabel
     fig.text(0.5, 0.05,'Frequency (Hz)',
              ha='center', va='center',fontsize=14, fontweight='bold')
-
-
-    # use this to stack EEG, EOG, EMG on top of each other
-    sub_order = [1,4,7,10,2,5,3,6,9]    
-
+ 
     for ch in range(0, len(data)):
         #plt.subplot(4, 3, sub_order[ch])  # 4 x 3 layout
         plt.subplot(9, 1, ch + 1)  # vertical 9 x 1 layout
@@ -200,10 +196,11 @@ def plot_psds(data, rate, subject, condition):
         
         Pxx, freqs = m.psd(data[ch], NFFT=512, Fs=rate)
         normalizedPxx = Pxx/sum(Pxx)
-        plt.plot(freqs, normalizedPxx, label=channel_name[ch])
-        #plt.bar(freqs, normalizedPxx, label=channel_name[ch])
+        #plt.plot(freqs, normalizedPxx, label=label_set[ch])
+        plt.bar(freqs, normalizedPxx, label=label_set[ch],width=0.1)
+        plt.axis([0,25,0,0.3])
         
-        plt.title(channel_name[ch]) 
+        plt.title(label_set[ch]) 
         #plt.xlabel('Frequency (Hz)')
         #plt.ylabel('Normalized Power Spectral Density')        
       
@@ -368,10 +365,16 @@ if __name__ == "__main__":
 #    v = interactive(beat_freq, f1=(200.0,300.0), f2=(200.0,300.0))
 #    display(v)
       
-    
+    # create a list "sdata_" for a single channel of a timeseries dataset
+    # each item of the list contains data for that observed sleep stage
+    sdata_sub1bsl = sort_by_stage(data_sub1bsl[0], stages_sub1rec)
     sdata_sub1rec = sort_by_stage(data_sub1rec[0], stages_sub1rec)
-    plot_psds(data_by_stage, srate, '1', 'Baseline')
-
-
+    sdata_sub2bsl = sort_by_stage(data_sub2bsl[0], stages_sub1rec)
+    sdata_sub2rec = sort_by_stage(data_sub2rec[0], stages_sub1rec)
+    plot_psds(sdata_sub1bsl, srate, '1', 'Baseline',stage_name)
+    plot_psds(sdata_sub1rec, srate, '1', 'Recovery',stage_name)
+    plot_psds(sdata_sub2bsl, srate, '2', 'Baseline',stage_name)
+    plot_psds(sdata_sub2rec, srate, '2', 'Recovery',stage_name)
+    
 
 
