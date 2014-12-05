@@ -347,3 +347,4 @@ if __name__ == "__main__":
       
     
     fooDf = convert_to_df(data_sub1bsl[0], stages_sub1bsl)
+    df2 = fooDf['stage']==5
