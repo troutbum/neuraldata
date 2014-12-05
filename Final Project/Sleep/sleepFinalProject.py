@@ -28,8 +28,8 @@ CFILES = np.array([['S1_BSL.npz', 'S1_REC.npz'],
                    ['S3_BSL.npz', 'S3_REC.npz'],
                    ['S4_BSL.npz', 'S4_REC.npz']])
 
-#CDIR = '/Users/Troutbum/Development/SleepEEGData/'
-CDIR = '/Users/Gene/Development/SleepEEGData/'
+CDIR = '/Users/Troutbum/Development/SleepEEGData/'
+#CDIR = '/Users/Gene/Development/SleepEEGData/'
 
 def load_sleepdata(filename, dirname=CDIR):
     """
@@ -171,15 +171,15 @@ def plot_hypnogram(eeg, channel, stages, srate, subject, condition):
     fig.savefig(fname+'.png', format='png')        
     return
 
-def plot_psds(data, rate, subject, condition, label_set):
+def plot_psds(data, rate, subject, condition, label_set, title):
     """
     Plots the frequency response for all 9 channels
     using the entire recording    
     """
     fig = plt.figure()   
    # common title
-    fig.suptitle('Frequency Response for Complete Recording - '+ 
-            'Subject #'+subject+' '+condition+' Dataset', 
+    fig.suptitle('Frequency Response ('+title
+            +')  Subject #'+subject+' '+condition, 
             fontsize=14, fontweight='bold')            
     # common ylabel
     fig.text(0.06, 0.5, 'Normalized Power Spectral Density', 
@@ -188,19 +188,30 @@ def plot_psds(data, rate, subject, condition, label_set):
     # common xlabel
     fig.text(0.5, 0.05,'Frequency (Hz)',
              ha='center', va='center',fontsize=14, fontweight='bold')
+  # use this to stack EEG, EOG, EMG on top of each other         
+    sub_order = [1,4,7,10,2,5,3,6,9]    
+
+    # determine max response to scale y-axis 
+    maxY = 0
+    for i in range(0, len(data)):
+        Pxx, freqs = m.psd(data[i], NFFT=512, Fs=rate)
+        normalizedPxx = Pxx/sum(Pxx)
+        if normalizedPxx.max() > maxY:
+            maxY = normalizedPxx.max()
+                 
  
-    for ch in range(0, len(data)):
-        #plt.subplot(4, 3, sub_order[ch])  # 4 x 3 layout
-        plt.subplot(9, 1, ch + 1)  # vertical 9 x 1 layout
+    for i in range(0, len(data)):
+        plt.subplot(4, 3, sub_order[i])  # 4 x 3 layout
+        #plt.subplot(9, 1, i + 1)  # vertical 9 x 1 layout
         plt.subplots_adjust(hspace=.6)  # adds space between subplots
         
-        Pxx, freqs = m.psd(data[ch], NFFT=512, Fs=rate)
+        Pxx, freqs = m.psd(data[i], NFFT=512, Fs=rate)
         normalizedPxx = Pxx/sum(Pxx)
         #plt.plot(freqs, normalizedPxx, label=label_set[ch])
-        plt.bar(freqs, normalizedPxx, label=label_set[ch],width=0.1)
-        plt.axis([0,25,0,0.3])
+        plt.bar(freqs, normalizedPxx, label=label_set[i],width=0.2)
+        plt.axis([0,70,0,maxY])
         
-        plt.title(label_set[ch]) 
+        plt.title(label_set[i]) 
         #plt.xlabel('Frequency (Hz)')
         #plt.ylabel('Normalized Power Spectral Density')        
       
@@ -211,7 +222,7 @@ def plot_psds(data, rate, subject, condition, label_set):
             sumPower = sumPower + (normalizedPxx[j] * freqs[j])
     
         avgFreq = sumPower/len(freqs)
-        print(channel_name[ch] + " average frequency = " + str(avgFreq))
+        print(channel_name[i] + " average frequency = " + str(avgFreq))
     return     
     
 
@@ -338,12 +349,16 @@ if __name__ == "__main__":
     """                   
   
     # plot frequency response of complete datasets  
-    """    
-    plot_psds(data_sub1bsl, srate, '1', 'Baseline')
-    plot_psds(data_sub1rec, srate, '1', 'Recovery')
-    plot_psds(data_sub2bsl, srate, '2', 'Baseline')
-    plot_psds(data_sub2rec, srate, '2', 'Recovery')
-    """
+       
+    plot_psds(data_sub1bsl, srate, '1', 'Baseline', 
+              channel_name,'by Channel over All Stages')
+    plot_psds(data_sub1rec, srate, '1', 'Recovery', 
+              channel_name,'by Channel over All Stages')
+    plot_psds(data_sub2bsl, srate, '2', 'Baseline', 
+              channel_name,'by Channel over All Stages')
+    plot_psds(data_sub2rec, srate, '2', 'Recovery', 
+              channel_name,'by Channel over All Stages')
+    
   
     # plot spectrograms of datasets
     """
@@ -367,14 +382,19 @@ if __name__ == "__main__":
       
     # create a list "sdata_" for a single channel of a timeseries dataset
     # each item of the list contains data for that observed sleep stage
-    sdata_sub1bsl = sort_by_stage(data_sub1bsl[0], stages_sub1rec)
-    sdata_sub1rec = sort_by_stage(data_sub1rec[0], stages_sub1rec)
-    sdata_sub2bsl = sort_by_stage(data_sub2bsl[0], stages_sub1rec)
-    sdata_sub2rec = sort_by_stage(data_sub2rec[0], stages_sub1rec)
-    plot_psds(sdata_sub1bsl, srate, '1', 'Baseline',stage_name)
-    plot_psds(sdata_sub1rec, srate, '1', 'Recovery',stage_name)
-    plot_psds(sdata_sub2bsl, srate, '2', 'Baseline',stage_name)
-    plot_psds(sdata_sub2rec, srate, '2', 'Recovery',stage_name)
+    channel = 3  
+    sdata_sub1bsl = sort_by_stage(data_sub1bsl[channel], stages_sub1rec)
+    sdata_sub1rec = sort_by_stage(data_sub1rec[channel], stages_sub1rec)
+    sdata_sub2bsl = sort_by_stage(data_sub2bsl[channel], stages_sub1rec)
+    sdata_sub2rec = sort_by_stage(data_sub2rec[channel], stages_sub1rec)
+    plot_psds(sdata_sub1bsl, srate, '1', 'Baseline',
+              stage_name, 'by Stage for '+str(channel_name[channel]))
+    plot_psds(sdata_sub1rec, srate, '1', 'Recovery',
+              stage_name, 'by Stage for '+str(channel_name[channel]))
+    plot_psds(sdata_sub2bsl, srate, '2', 'Baseline',
+              stage_name, 'by Stage for '+str(channel_name[channel]))
+    plot_psds(sdata_sub2rec, srate, '2', 'Recovery',
+              stage_name, 'by Stage for '+str(channel_name[channel]))
     
 
 
