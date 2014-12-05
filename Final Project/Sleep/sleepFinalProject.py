@@ -25,8 +25,8 @@ CFILES = np.array([['S1_BSL.npz', 'S1_REC.npz'],
                    ['S3_BSL.npz', 'S3_REC.npz'],
                    ['S4_BSL.npz', 'S4_REC.npz']])
 
-#CDIR = '/Users/Troutbum/Development/SleepEEGData/'
-CDIR = '/Users/Gene/Development/SleepEEGData/'
+CDIR = '/Users/Troutbum/Development/SleepEEGData/'
+#CDIR = '/Users/Gene/Development/SleepEEGData/'
 
 def load_sleepdata(filename, dirname=CDIR):
     """
@@ -75,7 +75,6 @@ def convert_to_df(data, stages):
         for j in range(0,30):            
             xstage[index] = stages[epoch]
             index = index + 1           
-    print len(xstage)  
     df = pd.DataFrame({'edata' : data, 'stage' : xstage})     
     return df
 
@@ -316,8 +315,10 @@ if __name__ == "__main__":
     """    
     
     # plot time series of sleep stage states
+    """
     plot_stage_vs_time(stages_sub1bsl, stages_sub1rec, 
                        stages_sub2bsl, stages_sub2rec)
+    """                   
   
     # plot frequency response of complete datasets  
     """    
@@ -327,12 +328,16 @@ if __name__ == "__main__":
     plot_psds(data_sub2rec, srate, '2', 'Recovery')
     """
   
-    # plot spectrograms of datasets  
+    # plot spectrograms of datasets
+    """
     plot_spectrograms(data_sub1bsl, srate, '1', 'Baseline')  
+    """    
     
     # plot one hypnogram (spectrogram and sleep stage)
-    #plot_hypnogram(data_sub1bsl[0], 0, stages_sub1bsl, srate, '1', 'Baseline' )
-  
+    """
+    plot_hypnogram(data_sub1bsl[0], 0, stages_sub1bsl, srate, '1', 'Baseline' )
+    """
+    
     # plot all hypnograms for all 9 channels in dataset 
     """      
     plotall_hypnograms(data_sub1bsl, stages_sub1bsl, srate, '1', 'Baseline')
@@ -346,5 +351,21 @@ if __name__ == "__main__":
     # df = pd.DataFrame({'edata' : data_sub1bsl[0], 'stage' : stages_sub1bsl})
       
     
-    fooDf = convert_to_df(data_sub1bsl[0], stages_sub1bsl)
-    df2 = fooDf['stage']==5
+    df = convert_to_df(data_sub1bsl[0], stages_sub1bsl)
+   
+    """   
+    # slice dataframe by row (i.e. sleep stage = 5)
+    df2 = df.ix[df.stage==5]
+    # slice datframe by column (just the edata)
+    df3 = df2['edata']
+    """
+    
+    # slice by row and column at the same time    
+    df4 = df.ix[df.stage==5]['edata']
+
+    plt.figure()
+    Pxx, freqs = m.psd(df4, NFFT=512, Fs=srate)
+    normalizedPxx = Pxx/sum(Pxx)
+    plt.plot(freqs, normalizedPxx)
+
+
