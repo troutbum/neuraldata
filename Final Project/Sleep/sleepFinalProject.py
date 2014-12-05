@@ -18,7 +18,10 @@ from IPython.display import Audio, display
            
 channel_name = ['EEG Ch1', 'EEG Ch2', 'EEG Ch8','EEG Ch9',
            'EOG Ch3', 'EOG Ch4',
-           'EMG Ch5', 'EMG Ch6', 'EMG Ch7'];            
+           'EMG Ch5', 'EMG Ch6', 'EMG Ch7'];  
+           
+stage_name = ['Awake', 'NREM Stage 1', 'NREM Stage 2', 'NREM Stage 3',
+              'NREM Stage 4', 'REM Sleep', 'Movement Time', 'Unscored']           
 
 CFILES = np.array([['S1_BSL.npz', 'S1_REC.npz'],
                    ['S2_BSL.npz', 'S2_REC.npz'],
@@ -67,16 +70,32 @@ def load_sleepdata(filename, dirname=CDIR):
     data = np.load(dirname + filename)
     return data['DATA'], int(data['srate']), data['stages']
 
-def convert_to_df(data, stages):
+def sort_by_stage(data, stages):
+    """
+    Sorts time series electrical data measurements (EEG, EOG, EMG)
+    by observed sleep stage (0 - 7)
+    """
     # expand stage observations from         
     xstage = np.zeros(len(data))        
     index = 0
     for epoch in range(0, len(stages)):
         for j in range(0,30):            
             xstage[index] = stages[epoch]
-            index = index + 1           
-    df = pd.DataFrame({'edata' : data, 'stage' : xstage})     
-    return df
+            index = index + 1   
+    # join with df        
+    df = pd.DataFrame({'edata' : data, 'stage' : xstage}) 
+
+    # create list
+    sdata= []
+    for i in range(0,7):
+        sdata.append(df.ix[df.stage==i]['edata'])     
+    """    
+    Pandas dataframe slicing techniques:
+    df2 = df.ix[df.stage==5]           # slice df by row (sleep stage= 5)
+    df3 = df2['edata']                 # slice df by column (just the edata)
+    df4 = df.ix[df.stage==5]['edata']  # slice by row and column  
+    """
+    return sdata
 
 def plot_spectrograms(data, rate, subject, condition):
     """
@@ -182,6 +201,7 @@ def plot_psds(data, rate, subject, condition):
         Pxx, freqs = m.psd(data[ch], NFFT=512, Fs=rate)
         normalizedPxx = Pxx/sum(Pxx)
         plt.plot(freqs, normalizedPxx, label=channel_name[ch])
+        #plt.bar(freqs, normalizedPxx, label=channel_name[ch])
         
         plt.title(channel_name[ch]) 
         #plt.xlabel('Frequency (Hz)')
@@ -347,25 +367,11 @@ if __name__ == "__main__":
      """
 #    v = interactive(beat_freq, f1=(200.0,300.0), f2=(200.0,300.0))
 #    display(v)
-  
-    # df = pd.DataFrame({'edata' : data_sub1bsl[0], 'stage' : stages_sub1bsl})
       
     
-    df = convert_to_df(data_sub1bsl[0], stages_sub1bsl)
-   
-    """   
-    # slice dataframe by row (i.e. sleep stage = 5)
-    df2 = df.ix[df.stage==5]
-    # slice datframe by column (just the edata)
-    df3 = df2['edata']
-    """
-    
-    # slice by row and column at the same time    
-    df4 = df.ix[df.stage==5]['edata']
+    sdata_sub1rec = sort_by_stage(data_sub1rec[0], stages_sub1rec)
+    plot_psds(data_by_stage, srate, '1', 'Baseline')
 
-    plt.figure()
-    Pxx, freqs = m.psd(df4, NFFT=512, Fs=srate)
-    normalizedPxx = Pxx/sum(Pxx)
-    plt.plot(freqs, normalizedPxx)
+
 
 
