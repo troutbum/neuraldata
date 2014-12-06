@@ -5,6 +5,7 @@ Created on Tue Dec  2 08:06:48 2014
 @author: Troutbum
 """
 
+import sleepModule as s
 import gc
 import numpy as np
 import pandas as pd
@@ -225,62 +226,7 @@ def plot_psds(data, rate, subject, condition, label_set, title):
         print(channel_name[i] + " average frequency = " + str(avgFreq))
     return     
 
-def compare_psds(data1, data2, rate, subject, condition1, condition2,
-                 channel, stage):
-    """
-    Plot PSDs of 2 datasets
-    implements low-pass filter to eliminate 60 Hz noise
-    """
-    Fcutoff = 55  # threshold for low-pass filter    
-    
-    fig = plt.figure()   
-   # common title
-    fig.suptitle('Frequency Response ('+channel
-            +') - Subject #'+subject+' '+condition1+
-            ' vs. '+condition2,
-            fontsize=14, fontweight='bold')            
-    # common ylabel
-    fig.text(0.06, 0.5, 'Normalized Power Spectral Density', 
-             ha='center', va='center', rotation='vertical',
-             fontsize=14, fontweight='bold')
-    # common xlabel
-    fig.text(0.5, 0.05,'Frequency (Hz)',
-             ha='center', va='center',fontsize=14, fontweight='bold')
-    # use this to stack EEG, EOG, EMG on top of each other         
-    #sub_order = [1,4,7,10,2,5,3,6,9]    
-  
-   
-    # FFT for data1
-    Pxx, freqs = m.psd(data1, NFFT=512, Fs=rate)  
-    # lowpass filter, cutoff frequency for 60Hz noise!  
-    df1 = pd.DataFrame({'freqs' : freqs, 'Pxx' : Pxx})    
-    df1 = df1.ix[df1.freqs <= Fcutoff]
-    # normalize after lowpass filter    
-    df1['normalPxx'] = df1.Pxx/sum(df1.Pxx)  
-    # determine max response to scale y-axis 
-    maxY = df1.normalPxx.max()
 
-    # FFT for data1
-    Pxx, freqs = m.psd(data1, NFFT=512, Fs=rate)
-    # lowpass filter, cutoff frequency for 60Hz noise!
-    df2 = pd.DataFrame({'freqs' : freqs, 'Pxx' : Pxx})    
-    df2 = df2.ix[df2.freqs <= Fcutoff]
-    # normalize after lowpass filter    
-    df2['normalPxx'] = df2.Pxx/sum(df2.Pxx)  
-    # determine max response to scale y-axis 
-    if df2.normalPxx.max() > maxY:
-        maxY = df2.normalPxx.max()        
-                        
-    plt.bar(df1.freqs, df1.normalPxx, label=condition1,width=0.2,
-            edgecolor = 'none') 
-    plt.plot(df2.freqs, df2.normalPxx, label=condition2, color='r')
-      
-    plt.axis([0,Fcutoff,0,maxY])       
-    plt.title(stage)       
-    #plt.xlabel('Frequency (Hz)')
-    #plt.ylabel('Normalized Power Spectral Density')        
-    plt.show()
-    return    
 
 def plot_hist_stages_base_vs_recovery(base_stages, rec_stages, subject):
     """
@@ -440,7 +386,7 @@ if __name__ == "__main__":
       
     # create a list "sdata_" for a single channel of a timeseries dataset
     # each item of the list contains data for that observed sleep stage
-    channel = 6  
+    channel = 8 
     sdata_sub1bsl = sort_by_stage(data_sub1bsl[channel], stages_sub1rec)
     sdata_sub1rec = sort_by_stage(data_sub1rec[channel], stages_sub1rec)
     sdata_sub2bsl = sort_by_stage(data_sub2bsl[channel], stages_sub1rec)
@@ -454,8 +400,9 @@ if __name__ == "__main__":
 #    plot_psds(sdata_sub2rec, srate, '2', 'Recovery',
 #              stage_name, 'by Stage for '+str(channel_name[channel]))
     
-    stage = 3
-    compare_psds(sdata_sub1bsl[stage], sdata_sub1bsl[stage], 
+    # create plot for each observed sleep stage
+    for stage in range(0,6):   
+        s.compare_psds(sdata_sub1bsl[stage], sdata_sub1rec[stage], 
                  srate, '1', 'Baseline', 'Recovery', channel_name[channel],
                  stage_name[stage])
 
