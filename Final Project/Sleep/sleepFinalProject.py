@@ -246,7 +246,8 @@ def plot_hist_stages_base_vs_recovery(base_stages, rec_stages, subject):
     mString2 = '\n3 - NREM Stage 3\n4 - NREM Stage 4\n5 - REM Sleep'
     mString3 = '\n6 - Movement Time\n7 - Unscored'
     mString = mString1 + mString2 + mString3
-    plt.annotate(mString, xy=(0.75, 0.45), xycoords='axes fraction')
+    plt.annotate(mString, xy=(0.75, 0.5), xycoords='axes fraction', 
+                 size=6)
     return
      
 def plot_stage_vs_time(stages_sub1bsl, stages_sub1rec, 
@@ -374,8 +375,8 @@ if __name__ == "__main__":
     plot_hypnogram(data_sub1bsl[0], 0, stages_sub1bsl, srate, '1', 'Baseline' )
     """
     
-    # plot all hypnograms for all 9 channels in dataset 
-    """      
+    # plot all hypnograms for all 9 channels in dataset  
+    """   
     plotall_hypnograms(data_sub1bsl, stages_sub1bsl, srate, '1', 'Baseline')
     plotall_hypnograms(data_sub1rec, stages_sub1rec, srate, '1', 'Recovery')
     plotall_hypnograms(data_sub2bsl, stages_sub2bsl, srate, '2', 'Baseline')
@@ -384,13 +385,37 @@ if __name__ == "__main__":
 #    v = interactive(beat_freq, f1=(200.0,300.0), f2=(200.0,300.0))
 #    display(v)
       
+    # Sort each data channel by sleep stage (0-7)  
     # create a list "sdata_" for a single channel of a timeseries dataset
     # each item of the list contains data for that observed sleep stage
-    channel = 8 
-    sdata_sub1bsl = sort_by_stage(data_sub1bsl[channel], stages_sub1rec)
-    sdata_sub1rec = sort_by_stage(data_sub1rec[channel], stages_sub1rec)
-    sdata_sub2bsl = sort_by_stage(data_sub2bsl[channel], stages_sub1rec)
-    sdata_sub2rec = sort_by_stage(data_sub2rec[channel], stages_sub1rec)
+#    channel = 8 
+#    sdata_sub1bsl = sort_by_stage(data_sub1bsl[channel], stages_sub1rec)
+#    sdata_sub1rec = sort_by_stage(data_sub1rec[channel], stages_sub1rec)
+#    sdata_sub2bsl = sort_by_stage(data_sub2bsl[channel], stages_sub1rec)
+#    sdata_sub2rec = sort_by_stage(data_sub2rec[channel], stages_sub1rec)
+
+    # Creates a multi-dimension list for the 
+    # time series datasets (4 sets for 2 subjects, 2 conditions)
+    # Each item of the list represents a channel.  
+    # For each channel, there is a list for each stage 
+
+    sdata_sub1bsl = []
+    sdata_sub1rec = []
+    sdata_sub2bsl = []
+    sdata_sub2rec = []
+
+    for channel in range(0,9):
+        sdata_sub1bsl.append(sort_by_stage(data_sub1bsl[channel],
+                                      stages_sub1rec))
+        sdata_sub1rec.append(sort_by_stage(data_sub1rec[channel], 
+                                      stages_sub1rec))
+        sdata_sub2bsl.append(sort_by_stage(data_sub2bsl[channel], 
+                                      stages_sub1rec))
+        sdata_sub2rec.append(sort_by_stage(data_sub2rec[channel], 
+                                      stages_sub1rec))
+
+
+
 #    plot_psds(sdata_sub1bsl, srate, '1', 'Baseline',
 #              stage_name, 'by Stage for '+str(channel_name[channel]))
 #    plot_psds(sdata_sub1rec, srate, '1', 'Recovery',
@@ -401,15 +426,26 @@ if __name__ == "__main__":
 #              stage_name, 'by Stage for '+str(channel_name[channel]))
     
     # create plot for each observed sleep stage
+    # Subject 1
+#    for stage in range(0,6):   
+#        s.compare_psds2(sdata_sub1bsl[stage], sdata_sub1rec[stage], 
+#                        srate, '1', 'Baseline', 'Recovery', 
+#                        channel_name[channel], stage_name[stage])
+
+    # create plot for each observed sleep stage
+    # Subject 2
+#    for stage in range(0,6):   
+#        s.compare_psds2(sdata_sub2bsl[stage], sdata_sub2rec[stage], 
+#                        srate, '2', 'Baseline', 'Recovery', 
+#                        channel_name[channel], stage_name[stage])
+
+    # modified for multi-level list structure
+    channel = 0
     for stage in range(0,6):   
-        s.compare_psds(sdata_sub1bsl[stage], sdata_sub1rec[stage], 
-                 srate, '1', 'Baseline', 'Recovery', channel_name[channel],
-                 stage_name[stage])
-
-
-
-
-
+        s.compare_psds2(sdata_sub2bsl[channel][stage], 
+                        sdata_sub2rec[channel][stage], 
+                        srate, '2', 'Baseline', 'Recovery', 
+                        channel_name[channel], stage_name[stage])
 
 
 
