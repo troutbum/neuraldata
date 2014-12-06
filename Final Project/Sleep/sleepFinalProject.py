@@ -324,23 +324,107 @@ def verify_datasets():
     Stages in file = 1715
     Calculated number of epochs = 2218
     """   
+
+def load_data():
+    """
+    Creates a multi-dimension list for the original
+    time series datasets (4 sets for 2 subjects, 2 conditions)
     
-##########################
-#You can put the code that calls the above functions down here    
-if __name__ == "__main__":
-    #YOUR CODE HERE
+    usage:  data[subject][condition][channel][stage]
     
-    plt.close('all') #Closes old plots.   
-    #    verify_datasets()  # checks # of stages vs calculated epochs
+    then sort by observed sleep stage:
     
-    # load datasets for Subject 1 & 2 (baseline & recovery)
+            sdata[subject][condition][channel][stage]
+    """ 
     
+    # load datasets for Subject 1 & 2 (baseline & recovery)    
     data_sub1bsl, srate, stages_sub1bsl = load_sleepdata(CFILES[0][0])
     data_sub1rec, srate, stages_sub1rec = load_sleepdata(CFILES[0][1]) 
     data_sub2bsl, srate, stages_sub2bsl = load_sleepdata(CFILES[1][0])
     data_sub2rec, srate, stages_sub2rec = load_sleepdata(CFILES[1][1]) 
-    
  
+    # Create lists of lists 
+    # for time series measurements: EEG, EOG, EMG  
+    #
+    # data[subject][condition][channel][stage]  
+    # 
+    data_sub1 = []  # list by condition
+    data_sub1.append(data_sub1bsl) 
+    data_sub1.append(data_sub1rec)
+
+    data_sub2 = []  # list by condition
+    data_sub2.append(data_sub2bsl) 
+    data_sub2.append(data_sub2rec)   
+
+    data = []  # list by subject
+    data.append(data_sub1)
+    data.append(data_sub2)
+    
+    # now organize the stages
+    #
+    # stages[subject][condition][channel][stage]  
+    # 
+    stages_sub1 = []  # list by condition
+    stages_sub1.append(stages_sub1bsl) 
+    stages_sub1.append(stages_sub1rec)
+
+    stages_sub2 = []  # list by condition
+    stages_sub2.append(stages_sub2bsl) 
+    stages_sub2.append(stages_sub2rec)   
+
+    stages = []  # list by subject
+    stages.append(stages_sub1)
+    stages.append(stages_sub2)
+
+    # now sort using the observed sleep stage
+    # using sort_by_stage()
+    #
+    sdata_sub1bsl = []  # list by stage
+    sdata_sub1rec = []
+    sdata_sub2bsl = []
+    sdata_sub2rec = []
+
+    # list by channel (method call returns list by stage)
+    for channel in range(0,9):
+        sdata_sub1bsl.append(sort_by_stage(data_sub1bsl[channel],
+                                      stages_sub1rec))
+        sdata_sub1rec.append(sort_by_stage(data_sub1rec[channel], 
+                                      stages_sub1rec))
+        sdata_sub2bsl.append(sort_by_stage(data_sub2bsl[channel], 
+                                      stages_sub1rec))
+        sdata_sub2rec.append(sort_by_stage(data_sub2rec[channel], 
+                                      stages_sub1rec))
+      
+    # Create lists of lists
+    #  
+    # sdata[subject][condition][channel][stage] 
+                            
+    sdata_sub1 = [] # list by condition
+    sdata_sub1.append(sdata_sub1bsl) 
+    sdata_sub1.append(sdata_sub1rec)
+
+    sdata_sub2 = []  # list by condition
+    sdata_sub2.append(sdata_sub2bsl) 
+    sdata_sub2.append(sdata_sub2rec)   
+
+    sdata = []  # list by subject
+    sdata.append(sdata_sub1)
+    sdata.append(sdata_sub2)
+    
+    return data, sdata, stages, srate
+
+    
+##########################
+#You can put the code that calls the above functions down here    
+if __name__ == "__main__":
+    
+    plt.close('all') #Closes old plots.   
+   
+    data, sdata, stages, srate = load_data()  
+   
+    # checks number of observed stages vs calculated epochs
+    #    verify_datasets()  
+    
     # plot histogram of sleep stage states
     """
     plot_hist_stages_base_vs_recovery(stages_sub1bsl, stages_sub1rec, 1)
@@ -384,68 +468,21 @@ if __name__ == "__main__":
      """
 #    v = interactive(beat_freq, f1=(200.0,300.0), f2=(200.0,300.0))
 #    display(v)
-      
-    # Sort each data channel by sleep stage (0-7)  
-    # create a list "sdata_" for a single channel of a timeseries dataset
-    # each item of the list contains data for that observed sleep stage
-#    channel = 8 
-#    sdata_sub1bsl = sort_by_stage(data_sub1bsl[channel], stages_sub1rec)
-#    sdata_sub1rec = sort_by_stage(data_sub1rec[channel], stages_sub1rec)
-#    sdata_sub2bsl = sort_by_stage(data_sub2bsl[channel], stages_sub1rec)
-#    sdata_sub2rec = sort_by_stage(data_sub2rec[channel], stages_sub1rec)
-
-    # Creates a multi-dimension list for the 
-    # time series datasets (4 sets for 2 subjects, 2 conditions)
-    # Each item of the list represents a channel.  
-    # For each channel, there is a list for each stage 
-
-    sdata_sub1bsl = []
-    sdata_sub1rec = []
-    sdata_sub2bsl = []
-    sdata_sub2rec = []
-
-    for channel in range(0,9):
-        sdata_sub1bsl.append(sort_by_stage(data_sub1bsl[channel],
-                                      stages_sub1rec))
-        sdata_sub1rec.append(sort_by_stage(data_sub1rec[channel], 
-                                      stages_sub1rec))
-        sdata_sub2bsl.append(sort_by_stage(data_sub2bsl[channel], 
-                                      stages_sub1rec))
-        sdata_sub2rec.append(sort_by_stage(data_sub2rec[channel], 
-                                      stages_sub1rec))
-
-
-
-#    plot_psds(sdata_sub1bsl, srate, '1', 'Baseline',
-#              stage_name, 'by Stage for '+str(channel_name[channel]))
-#    plot_psds(sdata_sub1rec, srate, '1', 'Recovery',
-#              stage_name, 'by Stage for '+str(channel_name[channel]))
-#    plot_psds(sdata_sub2bsl, srate, '2', 'Baseline',
-#              stage_name, 'by Stage for '+str(channel_name[channel]))
-#    plot_psds(sdata_sub2rec, srate, '2', 'Recovery',
-#              stage_name, 'by Stage for '+str(channel_name[channel]))
+     
+    # plot FFT for All Stages in a given channel
+    # sdata[subject][condition][channel][stage]  
+    channel = 0 
+    plot_psds(sdata[0][0][channel], srate, '1', 'Baseline',
+              stage_name, 'by Stage for '+str(channel_name[channel]))
     
-    # create plot for each observed sleep stage
-    # Subject 1
-#    for stage in range(0,6):   
-#        s.compare_psds2(sdata_sub1bsl[stage], sdata_sub1rec[stage], 
-#                        srate, '1', 'Baseline', 'Recovery', 
-#                        channel_name[channel], stage_name[stage])
 
-    # create plot for each observed sleep stage
-    # Subject 2
-#    for stage in range(0,6):   
-#        s.compare_psds2(sdata_sub2bsl[stage], sdata_sub2rec[stage], 
-#                        srate, '2', 'Baseline', 'Recovery', 
-#                        channel_name[channel], stage_name[stage])
-
-    # modified for multi-level list structure
+    # Plot comparing conditions (baseline vs recovery)
+    # for each observed sleep stage
+    subject = 1  # 2nd subject    
     channel = 0
     for stage in range(0,6):   
-        s.compare_psds2(sdata_sub2bsl[channel][stage], 
-                        sdata_sub2rec[channel][stage], 
-                        srate, '2', 'Baseline', 'Recovery', 
+        s.compare_psds2(sdata[subject][0][channel][stage], 
+                        sdata[subject][1][channel][stage], 
+                        srate, str(subject+1), 'Baseline', 'Recovery', 
                         channel_name[channel], stage_name[stage])
-
-
 
