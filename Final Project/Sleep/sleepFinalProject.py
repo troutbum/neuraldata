@@ -308,6 +308,7 @@ if __name__ == "__main__":
 
     # Plot Comparison of Baseline vs Recovery
     # for each observed sleep stage
+    """
     channel = 0
     for stage in range(0,6):
         s.compare_psds2(sdata[SUBJECT2][0][channel][stage], 
@@ -315,8 +316,29 @@ if __name__ == "__main__":
                         srate, SUB2, BSL, REC, 
                         channel_name[channel], stage_name[stage])
 
-    
-    
+    """
+    #resultsIndex = np.array()
+    # use a dataframe to build an index
+    Fcutoff = 55
+    listResults = []
+    i=0
+    dfResults = pd.DataFrame(columns=('subject', 'condition',
+                                      'channel','stage'), index=[i])
+    for subject in range(0,2):
+        for condition in range(0,2):
+            for channel in range(0,9):
+                for stage in range(0,6):
+                    dfFFT = s.runFFT(
+                        sdata[subject][condition][channel][stage],
+                        srate, Fcutoff)
+                    # store FFT results into a list (of returned dfs)    
+                    listResults.append(dfFFT)
+                    # build an index to results
+                    dfResults.loc[i] = [subject, condition, channel, stage]
+                    i = i + 1   
+
+                    
+    print('Length of results[] =' + str(len(listResults)))
     
     
     
