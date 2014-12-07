@@ -12,25 +12,30 @@ import pandas as pd
 import matplotlib.pylab as plt
 import matplotlib.pyplot as p
 import matplotlib.mlab as m
-from copy import deepcopy
-from datetime import timedelta
 from IPython.html.widgets import interactive
 from IPython.display import Audio, display
-           
-channel_name = ['EEG Ch1', 'EEG Ch2', 'EEG Ch8','EEG Ch9',
-           'EOG Ch3', 'EOG Ch4',
-           'EMG Ch5', 'EMG Ch6', 'EMG Ch7'];  
-           
-stage_name = ['Awake', 'NREM Stage 1', 'NREM Stage 2', 'NREM Stage 3',
-              'NREM Stage 4', 'REM Sleep', 'Movement Time', 'Unscored']           
 
-CFILES = np.array([['S1_BSL.npz', 'S1_REC.npz'],
-                   ['S2_BSL.npz', 'S2_REC.npz'],
-                   ['S3_BSL.npz', 'S3_REC.npz'],
-                   ['S4_BSL.npz', 'S4_REC.npz']])
-
+# directory location of data files
 CDIR = '/Users/Troutbum/Development/SleepEEGData/'
 #CDIR = '/Users/Gene/Development/SleepEEGData/'
+
+# labels
+subject_name = ['1', '2']
+condition_name = ['Baseline', 'Recovery']          
+channel_name = ['EEG Ch1', 'EEG Ch2', 'EEG Ch8','EEG Ch9',
+                'EOG Ch3', 'EOG Ch4',
+                'EMG Ch5', 'EMG Ch6', 'EMG Ch7'];            
+stage_name = ['Awake', 'NREM Stage 1', 'NREM Stage 2', 'NREM Stage 3',
+              'NREM Stage 4', 'REM Sleep', 'Movement Time', 'Unscored']           
+# shorthands
+BASELINE = 0
+BSL = 'Baseline'
+RECOVERY = 1
+REC = 'Recovery'
+SUBJECT1 = 0
+SUB1 = 'Subject1'
+SUBJECT2 = 1
+SUB2 = 'Subject2'
 
 def load_sleepdata(filename, dirname=CDIR):
     """
@@ -218,12 +223,12 @@ def plot_psds(data, rate, subject, condition, label_set, title):
       
         ## Inserted into plotting loop
         ## Possible Classifier - calculate average power-weighted frequency    
-        sumPower = 0
-        for j in range(0, len(normalizedPxx)):
-            sumPower = sumPower + (normalizedPxx[j] * freqs[j])
-    
-        avgFreq = sumPower/len(freqs)
-        print(channel_name[i] + " average frequency = " + str(avgFreq))
+#        sumPower = 0
+#        for j in range(0, len(normalizedPxx)):
+#            sumPower = sumPower + (normalizedPxx[j] * freqs[j])
+#    
+#        avgFreq = sumPower/len(freqs)
+#        print(channel_name[i] + " average frequency = " + str(avgFreq))
     return     
 
 
@@ -336,6 +341,10 @@ def load_data():
     
             sdata[subject][condition][channel][stage]
     """ 
+    CFILES = np.array([['S1_BSL.npz', 'S1_REC.npz'],
+                   ['S2_BSL.npz', 'S2_REC.npz'],
+                   ['S3_BSL.npz', 'S3_REC.npz'],
+                   ['S4_BSL.npz', 'S4_REC.npz']])    
     
     # load datasets for Subject 1 & 2 (baseline & recovery)    
     data_sub1bsl, srate, stages_sub1bsl = load_sleepdata(CFILES[0][0])
@@ -360,7 +369,7 @@ def load_data():
     data.append(data_sub1)
     data.append(data_sub2)
     
-    # now organize the stages
+    # now organize the Observed Sleep Stages
     #
     # stages[subject][condition][channel][stage]  
     # 
@@ -418,71 +427,85 @@ def load_data():
 #You can put the code that calls the above functions down here    
 if __name__ == "__main__":
     
-    plt.close('all') #Closes old plots.   
-   
+    plt.close('all') #Closes old plots.      
     data, sdata, stages, srate = load_data()  
    
     # checks number of observed stages vs calculated epochs
     #    verify_datasets()  
-    
-    # plot histogram of sleep stage states
-    """
-    plot_hist_stages_base_vs_recovery(stages_sub1bsl, stages_sub1rec, 1)
-    plot_hist_stages_base_vs_recovery(stages_sub2bsl, stages_sub2rec, 2)
-    """    
-    
+   
     # plot time series of sleep stage states
     """
-    plot_stage_vs_time(stages_sub1bsl, stages_sub1rec, 
-                       stages_sub2bsl, stages_sub2rec)
-    """                   
-  
+    plot_stage_vs_time(stages[SUBJECT1][BASELINE], stages[SUBJECT1][RECOVERY], 
+                   stages[SUBJECT2][BASELINE], stages[SUBJECT2][RECOVERY])    
+    """
+    
+    # plot histogram of sleep stage states 
+    """
+    plot_hist_stages_base_vs_recovery(stages[SUBJECT1][BASELINE], 
+                                      stages[SUBJECT1][RECOVERY], 
+                                      subject_name[SUBJECT1])
+    plot_hist_stages_base_vs_recovery(stages[SUBJECT2][BASELINE], 
+                                      stages[SUBJECT2][RECOVERY],
+                                      subject_name[SUBJECT2])            
+    """
+    
     # plot frequency response of complete datasets  
-    """   
-    plot_psds(data_sub1bsl, srate, '1', 'Baseline', 
-              channel_name,'by Channel over All Stages')
-    plot_psds(data_sub1rec, srate, '1', 'Recovery', 
-              channel_name,'by Channel over All Stages')
-    plot_psds(data_sub2bsl, srate, '2', 'Baseline', 
-              channel_name,'by Channel over All Stages')
-    plot_psds(data_sub2rec, srate, '2', 'Recovery', 
-              channel_name,'by Channel over All Stages')
     """
-  
+    plot_psds(data[SUBJECT1][BASELINE], srate, SUB1, BSL,
+             channel_name,'by Channel over All Stages')
+    plot_psds(data[SUBJECT1][RECOVERY], srate, SUB1, REC,
+             channel_name,'by Channel over All Stages')
+    plot_psds(data[SUBJECT2][BASELINE], srate, SUB2, BSL,
+             channel_name,'by Channel over All Stages')
+    plot_psds(data[SUBJECT2][RECOVERY], srate, SUB2, REC,
+             channel_name,'by Channel over All Stages')   
+    """
+         
     # plot spectrograms of datasets
-    """
-    plot_spectrograms(data_sub1bsl, srate, '1', 'Baseline')  
+    
+    """    
+    plot_spectrograms(data[SUBJECT1][BASELINE], srate, SUB1, BSL)  
     """    
     
     # plot one hypnogram (spectrogram and sleep stage)
     """
-    plot_hypnogram(data_sub1bsl[0], 0, stages_sub1bsl, srate, '1', 'Baseline' )
+    plot_hypnogram(data[SUBJECT1][BASELINE][channel], channel, 
+                   stages[SUBJECT1][BASELINE], srate, SUB1, BSL) 
     """
     
     # plot all hypnograms for all 9 channels in dataset  
-    """   
-    plotall_hypnograms(data_sub1bsl, stages_sub1bsl, srate, '1', 'Baseline')
-    plotall_hypnograms(data_sub1rec, stages_sub1rec, srate, '1', 'Recovery')
-    plotall_hypnograms(data_sub2bsl, stages_sub2bsl, srate, '2', 'Baseline')
-    plotall_hypnograms(data_sub2rec, stages_sub2rec, srate, '2', 'Recovery')
-     """
+    """
+    plotall_hypnograms(data[SUBJECT1][BASELINE], stages[SUBJECT1][BASELINE], 
+                       srate, SUB1, BSL)  
+    plotall_hypnograms(data[SUBJECT1][RECOVERY], stages[SUBJECT1][RECOVERY], 
+                       srate, SUB1, REC)
+    plotall_hypnograms(data[SUBJECT2][BASELINE], stages[SUBJECT2][BASELINE], 
+                       srate, SUB2, BSL)  
+    plotall_hypnograms(data[SUBJECT2][RECOVERY], stages[SUBJECT2][RECOVERY], 
+                       srate, SUB2, REC) 
+    """
+    
 #    v = interactive(beat_freq, f1=(200.0,300.0), f2=(200.0,300.0))
 #    display(v)
      
-    # plot FFT for All Stages in a given channel
-    # sdata[subject][condition][channel][stage]  
+    # plot FFT for All Stages, for a Single Channel
+    """ 
     channel = 0 
-    plot_psds(sdata[0][0][channel], srate, '1', 'Baseline',
+    plot_psds(sdata[SUBJECT1][BASELINE][channel], srate, SUB1, BSL,
               stage_name, 'by Stage for '+str(channel_name[channel]))
-    
+    """
 
-    # Plot comparing conditions (baseline vs recovery)
+    # Plot Comparison of Baseline vs Recovery
     # for each observed sleep stage
-    subject = 1  # 2nd subject    
     channel = 0
-    for stage in range(0,6):   
-        s.compare_psds2(sdata[subject][0][channel][stage], 
-                        sdata[subject][1][channel][stage], 
-                        srate, str(subject+1), 'Baseline', 'Recovery', 
+    for stage in range(0,6):
+        s.compare_psds2(sdata[SUBJECT2][0][channel][stage], 
+                        sdata[SUBJECT2][1][channel][stage], 
+                        srate, SUB2, BSL, REC, 
                         channel_name[channel], stage_name[stage])
 
+    
+    
+    
+    
+    
