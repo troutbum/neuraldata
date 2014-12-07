@@ -317,10 +317,11 @@ if __name__ == "__main__":
                         channel_name[channel], stage_name[stage])
 
     """
-    #resultsIndex = np.array()
-    # use a dataframe to build an index
-    Fcutoff = 55
-    listResults = []
+
+    Fcutoff = 55            # low-pass filter to remove 60 Hz noise
+    listResults = []        # list to store FFT results
+    
+    # build an index to results    
     i=0
     dfResults = pd.DataFrame(columns=('subject', 'condition',
                                       'channel','stage'), index=[i])
