@@ -14,8 +14,8 @@ from IPython.html.widgets import interactive
 from IPython.display import Audio, display
 
 # directory location of data files
-#CDIR = '/Users/Troutbum/Development/SleepEEGData/'
-CDIR = '/Users/Gene/Development/SleepEEGData/'
+CDIR = '/Users/Troutbum/Development/SleepEEGData/'
+#CDIR = '/Users/Gene/Development/SleepEEGData/'
 
 CFILES = np.array([['S1_BSL.npz', 'S1_REC.npz'],
                    ['S2_BSL.npz', 'S2_REC.npz'],
@@ -371,8 +371,18 @@ if __name__ == "__main__":
     # finds the userID of the highest scoring result    
     dfSortedResultsIdx.ix[dfSortedResultsIdx.index==0]['userID']
 
-
-
+    # 3D bar plot
+    s.plot_3Dbar(dfResultsIdx['channel'],dfResultsIdx['stage'],
+                   dfResultsIdx['score'])
+    # 3D bar plot
+    s.plot_3Dscatter(dfResultsIdx['channel'],dfResultsIdx['stage'],
+                   dfResultsIdx['score'])
+    """   
+    # 3D wireframe plot
+    s.plot_3Dwireframe(dfResultsIdx['channel'],dfResultsIdx['stage'],
+                   dfResultsIdx['score'])
     
-    
-    
+    # 3D surface plot
+    s.plot_3Dsurface(dfResultsIdx['channel'],dfResultsIdx['stage'],
+                   dfResultsIdx['score'])
+    """

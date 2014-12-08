@@ -4,7 +4,8 @@ Created on Fri Dec  5 19:09:51 2014
 
 @author: Troutbum
 """
-
+from mpl_toolkits.mplot3d import Axes3D
+from matplotlib import cm
 import pandas as pd
 import matplotlib.pylab as plt
 import matplotlib.mlab as m
@@ -270,3 +271,84 @@ def plot_stage_vs_time(stages_sub1bsl, stages_sub1rec,
     ax3.set_title('Subject 2 Baseline')
     ax4.set_title('Subject 2 Recovery')
     return        
+    
+
+def plot_3Dbar(xpos, ypos, dz):
+ 
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+ 
+    #xpos = [1,2,3,4,5,6,7,8,9,10]
+    #ypos = [2,3,4,5,1,6,2,1,7,2]
+    num_elements = len(xpos)
+    zpos = np.zeros(num_elements)
+    dx = np.ones(num_elements)*0.2
+    dy = np.ones(num_elements)*0.2
+    #dz = [1,2,3,4,5,6,7,8,9,10]
+ 
+    ax.bar3d(xpos, ypos, zpos, dx, dy, dz, color='#00ceaa')
+    ax.set_xlabel('Channel')
+    ax.set_ylabel('Sleep Stage')
+    ax.set_zlabel('Score')  
+    
+    plt.show() 
+    return
+
+def plot_3Dscatter(xpos, ypos, dz):
+ 
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+ 
+    num_elements = len(xpos)
+    zpos = np.zeros(num_elements)
+    dx = np.ones(num_elements)*0.2
+    dy = np.ones(num_elements)*0.2
+ 
+    ax.scatter(xpos, ypos, zpos, dx, dy, dz, color='#00ceaa')
+    ax.set_xlabel('Channel')
+    ax.set_ylabel('Sleep Stage')
+    ax.set_zlabel('Score')  
+    
+    plt.show() 
+    return
+
+
+def plot_3Dwireframe(X, Y, Z):  
+    fig = plt.figure(figsize=(8,6))
+    ax = fig.add_subplot(1, 1, 1, projection='3d')
+    ax.plot_wireframe(X, Y, Z, rstride=100, cstride=100)
+    ax.set_xlabel('Channel')
+    ax.set_ylabel('Sleep Stage')
+    ax.set_zlabel('Score')  
+    return
+ 
+#def plot_3Dsurface(X, Y, Z):  
+#    fig = plt.figure(figsize=(14,6))
+#    
+#    # `ax` is a 3D-aware axis instance because of the projection='3d' keyword argument to add_subplot
+#    ax = fig.add_subplot(1, 2, 1, projection='3d')
+#    
+#    p = ax.plot_surface(X, Y, Z, rstride=4, cstride=4, linewidth=0)
+#    
+#    # surface_plot with color grading and color bar
+#    ax = fig.add_subplot(1, 2, 2, projection='3d')
+#    ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.coolwarm, 
+#                    linewidth=0, antialiased=False)
+#    fig.colorbar(p, shrink=0.5) 
+#    return
+    
+def plot_3Dsurface(x, y, Z):      
+    X, Y = np.meshgrid(x, y)    
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+    ax.plot_surface(X, Y, Z, rstride=1, cstride=1, alpha=0.3)
+    cset = ax.contourf(X, Y, Z, zdir='z', offset=0, cmap=cm.coolwarm)
+    cset = ax.contourf(X, Y, Z, zdir='x', offset=0, cmap=cm.coolwarm)
+    cset = ax.contourf(X, Y, Z, zdir='y', offset=0, cmap=cm.coolwarm)
+    
+    ax.set_xlabel('Channel')
+    ax.set_ylabel('Sleep Stage')
+    ax.set_zlabel('Score')  
+    
+    plt.show()
+    return
