@@ -69,8 +69,10 @@ def compare_psds2(data1, data2, rate, subject, condition1, condition2,
     plt.plot(df2.freqs, df2.nPxx, label=condition2, color='r')
           
     plt.axis([0,Fcutoff,0,maxY])
+    #ax.axis.set_ticklabels([])   # hide x-axis labels on this subplot
     plt.legend()      
     plt.title(stage) 
+    fig.subplots_adjust(hspace=.35)    
     
     # plot differential between recovery & baseline conditions
     plt.subplot(2, 1, 2)

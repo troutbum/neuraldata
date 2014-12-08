@@ -374,17 +374,29 @@ if __name__ == "__main__":
     leaderboard, results, bslFFTs, recFFTs, MaxYs = analyze_datasets(sdata, 
                                                                      Fcutoff) 
     print(leaderboard)
+         
     
-    # finds the testID of the highest scoring result    
+    # finds the highest scoring result    
     rowID = int(leaderboard.ix[leaderboard.index==0]['testID'])
     print('The top scorer is in row '+str(rowID)+' of results df' )
 
     # plots the differential spectral analysis for top_score
     channel = int(results.ix[results.index==rowID]['channel'])
     stage = int(results.ix[results.index==rowID]['stage'])
+    subject = int(results.ix[results.index==rowID]['subject'])
     
     s.compare_psds2(bslFFTs[rowID], recFFTs[rowID], 
-                        srate, SUB2, BSL, REC,
+                        srate, subject_name[subject], BSL, REC,
+                        channel_name[channel], stage_name[stage])
+                        
+    # Good example plot
+    rowID = 3                 
+    channel = int(results.ix[results.index==rowID]['channel'])
+    stage = int(results.ix[results.index==rowID]['stage'])
+    subject = int(results.ix[results.index==rowID]['subject'])
+    
+    s.compare_psds2(bslFFTs[rowID], recFFTs[rowID], 
+                        srate, subject_name[subject], BSL, REC,
                         channel_name[channel], stage_name[stage])
 
     """ NEED TO DEBUG PIVOT TABLE
