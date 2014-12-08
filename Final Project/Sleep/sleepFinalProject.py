@@ -232,6 +232,57 @@ def load_data():
     
     return data, sdata, stages, srate
 
+def analyze_datasets(sdata, Fcutoff):
+    
+    listResultsBsl = []     # lists to store FFT results
+    listResultsRec = []
+    listResultsMaxY = []
+    # build an index to results    
+    i=0
+    dfResultsIdx = pd.DataFrame(columns=('testID','subject', 'condition',
+                                      'channel','stage','score'), index=[i])
+    for subject in range(0,2):
+        for channel in range(0,9):
+            for stage in range(0,6):
+                # FFT for baseline
+                df1 = s.runFFT(
+                    sdata[subject][BASELINE][channel][stage],
+                    srate, Fcutoff)
+                maxY = df1.nPxx.max()  # scale plot y-axis
+                
+                # FFT for recovery    
+                df2 = s.runFFT(
+                    sdata[subject][RECOVERY][channel][stage],
+                    srate, Fcutoff)
+                    
+                if df2.nPxx.max() > maxY:       # scale plot y-axis
+                    maxY = df2.nPxx.max()     
+                
+                # save FFT results into a list   
+                listResultsBsl.append(df1)
+                listResultsRec.append(df2)
+                listResultsMaxY.append(maxY)
+                
+                # integrate the absolute value of the differential
+                # between the baseline and recovery FFTs
+                score = sum(abs(df2.nPxx - df1.nPxx))                  
+                                
+                # build an index to results (as a dataframe)
+                # note:  added testID to simplify later retrieval of FFT data
+                testID = i
+                dfResultsIdx.loc[i] = [testID, subject, BASELINE, channel,
+                                    stage, score]
+                i = i + 1  
+                
+    # use score to descending sort the results index
+    leaderboard = dfResultsIdx.sort(columns='score', ascending=False)
+ 
+    # re-index dataframe since reindex() does not doe this!
+    leaderboard.index = np.arange(0, len(leaderboard))
+                    
+    return (leaderboard, dfResultsIdx, listResultsBsl, listResultsRec, 
+            listResultsMaxY)
+
     
 ##########################
 #You can put the code that calls the above functions down here    
@@ -262,13 +313,13 @@ if __name__ == "__main__":
     # plot frequency response of complete datasets  
     """
     s.plot_psds(data[SUBJECT1][BASELINE], srate, SUB1, BSL,
-             channel_name,'by Channel over All Stages')
+             channel_name,'All Stages')
     s.plot_psds(data[SUBJECT1][RECOVERY], srate, SUB1, REC,
-             channel_name,'by Channel over All Stages')
+             channel_name,'All Stages')
     s.plot_psds(data[SUBJECT2][BASELINE], srate, SUB2, BSL,
-             channel_name,'by Channel over All Stages')
+             channel_name,'All Stages')
     s.plot_psds(data[SUBJECT2][RECOVERY], srate, SUB2, REC,
-             channel_name,'by Channel over All Stages')   
+             channel_name,'All Stages')   
     """
          
     # plot spectrograms of datasets
@@ -315,68 +366,41 @@ if __name__ == "__main__":
                         sdata[SUBJECT2][1][channel][stage], 
                         srate, SUB2, BSL, REC, 
                         channel_name[channel], stage_name[stage])
+                        
+                        
 
     """
-
     Fcutoff = 55            # low-pass filter to remove 60 Hz noise
-    listResultsBsl = []     # lists to store FFT results
-    listResultsRec = []
-    listResultsMaxY = []
-    # build an index to results    
-    i=0
-    dfResultsIdx = pd.DataFrame(columns=('userID','subject', 'condition',
-                                      'channel','stage','score'), index=[i])
-    for subject in range(0,2):
-        #for condition in range(0,2):
-        for channel in range(0,9):
-            for stage in range(0,6):
-                # FFT for baseline
-                df1 = s.runFFT(
-                    sdata[subject][BASELINE][channel][stage],
-                    srate, Fcutoff)
-                maxY = df1.nPxx.max()
-                
-                # FFT for recovery    
-                df2 = s.runFFT(
-                    sdata[subject][RECOVERY][channel][stage],
-                    srate, Fcutoff)
-                    
-                if df2.nPxx.max() > maxY:       # scale plot y-axis
-                    maxY = df2.nPxx.max()     
-                
-                # integrate the absolute value of the differential
-                # between the baseline and recovery FFTs
-                score = sum(abs(df2.nPxx - df1.nPxx))  
-                
-                # store FFT results into a list (of returned dfs)    
-                listResultsBsl.append(df1)
-                listResultsRec.append(df2)
-                listResultsMaxY.append(maxY)
-                
-                # build an index to results 
-                # note:  added userID to simplify later selection
-                userID = i
-                dfResultsIdx.loc[i] = [userID, subject, BASELINE, channel,
-                                    stage, score]
-                i = i + 1   
-                    
-    print(dfResultsIdx) 
+    leaderboard, results, bslFFTs, recFFTs, MaxYs = analyze_datasets(sdata, 
+                                                                     Fcutoff) 
+    print(leaderboard)
     
-    # use score to descending sort the results index
-    dfSortedResultsIdx = dfResultsIdx.sort(columns='score', ascending=False)
-    print(dfSortedResultsIdx)
-    # re-index dataframe since reindex() does not doe this!
-    dfSortedResultsIdx.index = np.arange(0, len(dfSortedResultsIdx))
-    
-    # finds the userID of the highest scoring result    
-    dfSortedResultsIdx.ix[dfSortedResultsIdx.index==0]['userID']
+    # finds the testID of the highest scoring result    
+    rowID = int(leaderboard.ix[leaderboard.index==0]['testID'])
+    print('The top scorer is in row '+str(rowID)+' of results df' )
 
+    # plots the differential spectral analysis for top_score
+    channel = int(results.ix[results.index==rowID]['channel'])
+    stage = int(results.ix[results.index==rowID]['stage'])
+    
+    s.compare_psds2(bslFFTs[rowID], recFFTs[rowID], 
+                        srate, SUB2, BSL, REC,
+                        channel_name[channel], stage_name[stage])
+
+    """ NEED TO DEBUG PIVOT TABLE
+    table = pd.pivot_table(results, values='scores', index=['stage'], 
+                        columns=['channel'], aggfunc=np.sum)
+    table
+    """    
+    
     # 3D bar plot
-    s.plot_3Dbar(dfResultsIdx['channel'],dfResultsIdx['stage'],
-                   dfResultsIdx['score'])
+    s.plot_3Dbar(results['channel'], results['stage'], results['score'])
+    
+    """
     # 3D bar plot
     s.plot_3Dscatter(dfResultsIdx['channel'],dfResultsIdx['stage'],
                    dfResultsIdx['score'])
+    """
     """   
     # 3D wireframe plot
     s.plot_3Dwireframe(dfResultsIdx['channel'],dfResultsIdx['stage'],

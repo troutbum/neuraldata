@@ -165,7 +165,7 @@ def plot_psds(data, rate, subject, condition, label_set, title):
     fig = plt.figure()   
    # common title
     fig.suptitle('Frequency Response ('+title
-            +') - Subject #'+subject+' '+condition, 
+            +')'+subject+' '+condition, 
             fontsize=14, fontweight='bold')            
     # common ylabel
     fig.text(0.06, 0.5, 'Normalized Power Spectral Density', 
@@ -278,18 +278,16 @@ def plot_3Dbar(xpos, ypos, dz):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
  
-    #xpos = [1,2,3,4,5,6,7,8,9,10]
-    #ypos = [2,3,4,5,1,6,2,1,7,2]
     num_elements = len(xpos)
     zpos = np.zeros(num_elements)
     dx = np.ones(num_elements)*0.2
     dy = np.ones(num_elements)*0.2
-    #dz = [1,2,3,4,5,6,7,8,9,10]
  
     ax.bar3d(xpos, ypos, zpos, dx, dy, dz, color='#00ceaa')
     ax.set_xlabel('Channel')
     ax.set_ylabel('Sleep Stage')
     ax.set_zlabel('Score')  
+    ax.set_title('Frequency Domain Differential (Baseline vs Recovery)')  
     
     plt.show() 
     return
