@@ -14,8 +14,8 @@ from IPython.html.widgets import interactive
 from IPython.display import Audio, display
 
 # directory location of data files
-CDIR = '/Users/Troutbum/Development/SleepEEGData/'
-#CDIR = '/Users/Gene/Development/SleepEEGData/'
+#CDIR = '/Users/Troutbum/Development/SleepEEGData/'
+CDIR = '/Users/Gene/Development/SleepEEGData/'
 
 CFILES = np.array([['S1_BSL.npz', 'S1_REC.npz'],
                    ['S2_BSL.npz', 'S2_REC.npz'],
@@ -319,27 +319,60 @@ if __name__ == "__main__":
     """
 
     Fcutoff = 55            # low-pass filter to remove 60 Hz noise
-    listResults = []        # list to store FFT results
-    
+    listResultsBsl = []     # lists to store FFT results
+    listResultsRec = []
+    listResultsMaxY = []
     # build an index to results    
     i=0
-    dfResults = pd.DataFrame(columns=('subject', 'condition',
-                                      'channel','stage'), index=[i])
+    dfResultsIdx = pd.DataFrame(columns=('userID','subject', 'condition',
+                                      'channel','stage','score'), index=[i])
     for subject in range(0,2):
-        for condition in range(0,2):
-            for channel in range(0,9):
-                for stage in range(0,6):
-                    dfFFT = s.runFFT(
-                        sdata[subject][condition][channel][stage],
-                        srate, Fcutoff)
-                    # store FFT results into a list (of returned dfs)    
-                    listResults.append(dfFFT)
-                    # build an index to results
-                    dfResults.loc[i] = [subject, condition, channel, stage]
-                    i = i + 1   
-
+        #for condition in range(0,2):
+        for channel in range(0,9):
+            for stage in range(0,6):
+                # FFT for baseline
+                df1 = s.runFFT(
+                    sdata[subject][BASELINE][channel][stage],
+                    srate, Fcutoff)
+                maxY = df1.nPxx.max()
+                
+                # FFT for recovery    
+                df2 = s.runFFT(
+                    sdata[subject][RECOVERY][channel][stage],
+                    srate, Fcutoff)
                     
-    print('Length of results[] =' + str(len(listResults)))
+                if df2.nPxx.max() > maxY:       # scale plot y-axis
+                    maxY = df2.nPxx.max()     
+                
+                # integrate the absolute value of the differential
+                # between the baseline and recovery FFTs
+                score = sum(abs(df2.nPxx - df1.nPxx))  
+                
+                # store FFT results into a list (of returned dfs)    
+                listResultsBsl.append(df1)
+                listResultsRec.append(df2)
+                listResultsMaxY.append(maxY)
+                
+                # build an index to results 
+                # note:  added userID to simplify later selection
+                userID = i
+                dfResultsIdx.loc[i] = [userID, subject, BASELINE, channel,
+                                    stage, score]
+                i = i + 1   
+                    
+    print(dfResultsIdx) 
+    
+    # use score to descending sort the results index
+    dfSortedResultsIdx = dfResultsIdx.sort(columns='score', ascending=False)
+    print(dfSortedResultsIdx)
+    # re-index dataframe since reindex() does not doe this!
+    dfSortedResultsIdx.index = np.arange(0, len(dfSortedResultsIdx))
+    
+    # finds the userID of the highest scoring result    
+    dfSortedResultsIdx.ix[dfSortedResultsIdx.index==0]['userID']
+
+
+
     
     
     
