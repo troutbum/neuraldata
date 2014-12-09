@@ -10,8 +10,8 @@ import gc
 import numpy as np
 import pandas as pd
 import matplotlib.pylab as plt
-from IPython.html.widgets import interactive
-from IPython.display import Audio, display
+#from IPython.html.widgets import interactive
+#from IPython.display import Audio, display
 
 # directory location of data files
 CDIR = '/Users/Troutbum/Development/SleepEEGData/'
@@ -232,7 +232,7 @@ def load_data():
     
     return data, sdata, stages, srate
 
-def analyze_datasets(sdata, Fcutoff):
+def analyze_datasets(sdata, srate, Fcutoff):
     
     listResultsBsl = []     # lists to store FFT results
     listResultsRec = []
@@ -371,10 +371,12 @@ if __name__ == "__main__":
 
     """
     Fcutoff = 55            # low-pass filter to remove 60 Hz noise
-    leaderboard, results, bslFFTs, recFFTs, MaxYs = analyze_datasets(sdata, 
-                                                                     Fcutoff) 
+    leaderboard,results,bslFFTs,recFFTs, MaxYs=analyze_datasets(sdata, 
+                                                                srate, Fcutoff)                      
     print(leaderboard)
-         
+    
+    # 3D bar plot of all 108 Pairwise Differential Spectral Comparisons
+    s.plot_3Dbar(results['channel'], results['stage'], results['score'])     
     
     # finds the highest scoring result    
     rowID = int(leaderboard.ix[leaderboard.index==0]['testID'])
@@ -399,15 +401,15 @@ if __name__ == "__main__":
                         srate, subject_name[subject], BSL, REC,
                         channel_name[channel], stage_name[stage])
 
+    
+    
+    
+   
     """ NEED TO DEBUG PIVOT TABLE
     table = pd.pivot_table(results, values='scores', index=['stage'], 
                         columns=['channel'], aggfunc=np.sum)
     table
-    """    
-    
-    # 3D bar plot
-    s.plot_3Dbar(results['channel'], results['stage'], results['score'])
-    
+    """     
     """
     # 3D bar plot
     s.plot_3Dscatter(dfResultsIdx['channel'],dfResultsIdx['stage'],
